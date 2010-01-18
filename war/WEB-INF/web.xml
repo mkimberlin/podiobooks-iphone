@@ -13,14 +13,6 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
 		</init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
-	<servlet>
-		<servlet-name>PodiobooksPlayer</servlet-name>
-		<servlet-class>com.podiobooks.iphone.PlayerServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>PodiobooksPlayer</servlet-name>
-		<url-pattern>/iphone</url-pattern>
-	</servlet-mapping>
     <servlet-mapping>
         <servlet-name>PodiobooksRestServices</servlet-name>
         <url-pattern>/resources/*</url-pattern>

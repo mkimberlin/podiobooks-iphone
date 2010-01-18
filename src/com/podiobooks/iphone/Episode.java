@@ -9,6 +9,6 @@ public class Episode {
     private String title;
     private String description;
     private Date publicationDate;
-    private String author;
     private String duration;
+    private String url;
 }

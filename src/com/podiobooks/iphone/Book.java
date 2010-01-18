@@ -11,12 +11,13 @@ import lombok.Data;
 @XmlRootElement(name="book")
 public class Book {
 	private String title;
-    private String author;
+    private List<String> authors;
 	private String description;
 	private List<String> categories;
 	private String copyright;
 	private String url;
 	private Date lastUpdated;
 	private String imageUrl;
+	private String feedUrl;
 	private List<Episode> episodes;
 }
