@@ -48,7 +48,7 @@ function populateCategories(list) {
 }
 function loadCategory(category) {
 	showProgress();
-	$.getJSON('resources/books/category/'+category,
+	$.getJSON('resources/books/category/'+category.replace(/\//g,"-_-"),
         function(bookList) {
 		    $('body').load('books.html #container', function() {populateBooks(category, bookList);});
 	    });

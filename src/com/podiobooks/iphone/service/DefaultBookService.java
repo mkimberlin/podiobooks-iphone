@@ -128,6 +128,7 @@ public class DefaultBookService implements BookService {
     @Produces("application/json")
     @Override
     public BookList getBooks(@PathParam("category")String category) {
+        category = category.replaceAll("-_-", "/");
         List<Book> books = new ArrayList<Book>();
         try {
             Document doc = feedDao.retrieveFeed(ALL_BOOKS_FEED);
