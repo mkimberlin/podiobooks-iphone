@@ -1,34 +1,79 @@
+var hist = [];
+var start = new History('Home', function() {loadPage('index.html');});
+
 $(document).ready(function(){ 
     loadPage();
 });
+
 function loadPage(url) {
     showProgress();
-    if (url == undefined) {
-        hijackLinks();
-        removeProgress();
-    } else {
-        $('body').load(url + ' #container', hijackLinks);
-    }
     scrollTo(0,1);
+    if (url == undefined || url == 'index.html') {
+        if(url != undefined) {
+        	$('body').load(url + ' #container', handleStartPage);
+        } else {
+        	handleStartPage();
+        }
+    } else {
+        $('body').load(url + ' #container', function() {handlePageChange(url);});
+    }
 }
+
+function handleStartPage() {
+    hijackLinks();
+    hist.unshift(start);
+    removeProgress();
+}
+
+function History(title, method) {
+	this.title = title;
+	this.method = method;
+}
+function handlePageChange(url) {
+    hijackLinks();
+    var title = $("#header h1").html();
+    $('#backbutton').remove();
+    hist.unshift(new History(title, function() {loadPage(url);}));
+    addBackButton();
+    removeProgress();
+}
+
+function addBackButton(){
+    if(hist.length > 1) {
+    	$('#header').prepend('<div id="backButton">'+hist[1].title+'</div>');
+    	$('#backButton').click(function(){
+    		//Remove current page
+    		hist.shift();
+    		var history = hist.shift();
+    		history.method();
+        });
+    }
+}
+
 function showProgress() {
 	$('body').append('<div id="progress">Loading...</div>');
 }
+
 function removeProgress() {
-	$('#progress').remove();
+	var progress = $('#progress');
+	if(progress != undefined) {
+		progress.remove();
+	}
 }
+
 function hijackLinks() {
-    var header = $('#header');
-    if(header != undefined) {
-        header.click(function(){
-            loadPage('index.html');
-        });
-    }
+//    var header = $('#header');
+//    if(header != undefined) {
+//        header.click(function(){
+//            loadPage('index.html');
+//        });
+//    }
     $('#content a.static').click(function(e){
         e.preventDefault();
         loadPage(e.target.href);
     });
 }
+
 function loadCategories() {
 	showProgress();
 	$.getJSON('resources/category/list',
@@ -36,7 +81,13 @@ function loadCategories() {
 		    $('body').load('categories.html #container', function() {populateCategories(categoryList);});
 	    });
 }
+
 function populateCategories(list) {
+    var title = $("#header h1").html();
+    $('#backbutton').remove();
+    hist.unshift(new History(title, loadCategories));
+    addBackButton();
+	
 	var categories = list.categories;
     var categoryList = $("#categories");
     for(var idx in categories) {
@@ -46,6 +97,7 @@ function populateCategories(list) {
     scrollTo(0,1);
     hijackLinks();
 }
+
 function loadCategory(category) {
 	showProgress();
 	$.getJSON('resources/books/category/'+category.replace(/\//g,"-_-"),
@@ -53,9 +105,14 @@ function loadCategory(category) {
 		    $('body').load('books.html #container', function() {populateBooks(category, bookList);});
 	    });
 }
+
 function populateBooks(category, list) {
 	var headerText = $('#header h1');
 	headerText.text(category);
+	
+    $('#backbutton').remove();
+    hist.unshift(new History(category, function() {loadCategory(category);}));
+    addBackButton();
 	
 	var books = list.books;
     var bookList = $("#books");
@@ -72,19 +129,22 @@ function populateBooks(category, list) {
     scrollTo(0,1);
     hijackLinks();
 }
+
 function loadBookDetail(title) {
 	showProgress();
     $.getJSON('resources/books/title/'+title,
         function(book){
-    	    $('body').load('detail.html #container', function() {replaceBookData(book);});
+    	    $('body').load('detail.html #container', function() {replaceBookData(book, title);});
         });
 }
-function replaceBookData(book) {
+
+function replaceBookData(book, title) {
     var bookTitle = $('#bookTitle');
     bookTitle.text(book.title);
-    bookTitle.click(function(){
-        loadPage('index.html');
-    });
+
+    $('#backbutton').remove();
+    hist.unshift(new History(book.title, function() {loadBookDetail(title);}));
+    addBackButton();
     
     var authorText = 'by ';
     if(book.authors instanceof Array) {

@@ -85,7 +85,7 @@ ul li:last-child a {
     -webkit-border-bottom-left-radius: 8px;
     -webkit-border-bottom-right-radius: 8px;
 }
-ul li a:active,ul li a:hover {
+ul li a:active {
     background-color:blue;
     color:white;
 }
@@ -108,4 +108,22 @@ ul li a:active,ul li a:hover {
     text-align: center;
     top: 120px;
     width: 200px;
+}
+
+#backButton {
+    font-weight: bold;
+    text-align: center;
+    line-height: 28px;
+    color: white;
+    text-shadow: rgba(0,0,0,0.6) 0px -1px 0px;
+    position: absolute;
+    top: 7px;
+    left: 6px;
+    max-width: 50px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-width: 0 8px 0 14px;
+    -webkit-border-image: url(../images/back.png) 0 8 0 14;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
 }
