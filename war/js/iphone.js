@@ -40,7 +40,7 @@ function handlePageChange(url) {
 
 function addBackButton(){
     if(hist.length > 1) {
-    	$('#header').prepend('<div id="backButton">'+hist[1].title+'</div>');
+    	$('#header').prepend('<span id="backButton">'+hist[1].title+'</span>');
     	$('#backButton').click(function(){
     		//Remove current page
     		hist.shift();
