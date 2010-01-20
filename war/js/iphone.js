@@ -212,6 +212,14 @@ function search(query) {
 
 function populateSearchResults(keywords, result) {
     $('#backbutton').remove();
+    
+	var searchForm = $('#searchForm');
+	searchForm.submit(function(event){    
+	    search(); 
+	    event.preventDefault();
+	    return false;
+	});
+    
     //Avoid making multiple searches new history entries...
     var last = hist.shift();
     if(last.title != 'Search') {
@@ -224,6 +232,29 @@ function populateSearchResults(keywords, result) {
     
     displayBookResults(result);
     
+    removeProgress();
+    scrollTo(0,1);
+    hijackLinks();
+}
+
+function loadRecent() {
+	showProgress();
+	$.getJSON('resources/books/recent',
+        function(updates) {
+		    $('body').load('books.html #container', function() {populateRecent(updates);});
+	    });
+}
+
+function populateRecent(list) {
+	var headerText = $('#header h1');
+	headerText.text('Recent Updates');
+	
+    $('#backbutton').remove();
+    hist.unshift(new History('Recent Updates', loadRecent));
+    addBackButton();
+	
+    displayBookResults(list);
+
     removeProgress();
     scrollTo(0,1);
     hijackLinks();

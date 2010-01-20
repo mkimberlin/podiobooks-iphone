@@ -52,6 +52,9 @@ public class DefaultBookService implements BookService {
     private static final String ALL_BOOKS_FEED = "http://www.podiobooks.com/opml/all/";
 
     private static final String BASE_SEARCH_URL = "http://www.podiobooks.com/podiobooks/search.php?includeAdult=1&keyword=";
+    
+    private static final String MAIN_URL = "http://www.podiobooks.com/";
+    
     /**
      * {@inheritDoc}
      */
@@ -192,6 +195,45 @@ public class DefaultBookService implements BookService {
                 result.delete(0, endPos);
                 String title = result.substring(result.indexOf(">")+1, result.indexOf("</a"));
                 result.delete(0, title.length()+4);
+                Book book = new Book();
+                book.setTitle(title);
+                book.setFeedUrl(BASE_BOOK_FEED_URL.replaceFirst(TITLE_PLACEHOLDER, titleUrlFragment));
+                books.add(book);
+            }
+        } catch (Exception e) {}
+        bookList.setBooks(books);
+        return bookList;
+    }
+    
+    @GET
+    @Path("recent")
+    @Produces("application/json")
+    @Override
+    public BookList getRecentUpdates() {
+        BookList bookList = new BookList();
+        List<Book> books = new ArrayList<Book>();
+        try {
+            URL url = new URL(MAIN_URL);
+            BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+            StringBuilder result = new StringBuilder();
+            CharBuffer current = CharBuffer.allocate(1024);
+            while (in.read(current) != -1) {
+                result.append(current.array());
+                current.clear();
+            }
+            //Snip out the recent updates section...
+            result.delete(0, result.indexOf("<p>Recent Updates</p>"));
+            result.delete(result.indexOf("</ul>"), result.length());
+            
+            while(result.indexOf("/title/") >= 0) {
+                int nextPos = result.indexOf("/title/")+7;
+                int endPos = result.indexOf("/\"", nextPos);
+                String titleUrlFragment = result.substring(nextPos, endPos);
+                result.delete(0, endPos);
+                nextPos = result.indexOf(">")+1;
+                endPos = result.indexOf("</a");
+                String title = result.substring(nextPos, endPos);
+                result.delete(0, endPos);
                 Book book = new Book();
                 book.setTitle(title);
                 book.setFeedUrl(BASE_BOOK_FEED_URL.replaceFirst(TITLE_PLACEHOLDER, titleUrlFragment));

@@ -51,4 +51,12 @@ public interface BookService {
      *         title and feedUrl populated
      */
     public BookList searchBooks(String keywords);
+    
+    /**
+     * Retrieves the list of recent updates from the podiobooks.com front page.
+     * 
+     * @return the list of books containing recent updates with only the title
+     *         and feedUrl populated
+     */
+    public BookList getRecentUpdates();
 }
