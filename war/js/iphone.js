@@ -113,21 +113,26 @@ function populateBooks(category, list) {
     $('#backbutton').remove();
     hist.unshift(new History(category, function() {loadCategory(category);}));
     addBackButton();
-	
+
+    displayBookResults(list);
+
+    removeProgress();
+    scrollTo(0,1);
+    hijackLinks();
+}
+
+function displayBookResults(list) {
 	var books = list.books;
     var bookList = $("#books");
     if(books instanceof Array) {
     for(var idx in books) {
-    	var bookTitle = books[idx].url.substring(books[idx].url.lastIndexOf('/title/')+7, books[idx].url.lastIndexOf('/feed'));
+    	var bookTitle = books[idx].feedUrl.substring(books[idx].feedUrl.lastIndexOf('/title/')+7, books[idx].feedUrl.lastIndexOf('/feed'));
     	bookList.append('<li><a href="#" onclick="javascript:loadBookDetail(\''+bookTitle+'\')">'+books[idx].title+'</a></li>');
     }
     } else {
-    	var bookTitle = books.url.substring(books.url.lastIndexOf('/title/')+7, books.url.lastIndexOf('/feed'));
+    	var bookTitle = books.feedUrl.substring(books.feedUrl.lastIndexOf('/title/')+7, books.feedUrl.lastIndexOf('/feed'));
     	bookList.append('<li><a href="#" onclick="javascript:loadBookDetail(\''+bookTitle+'\')">'+books.title+'</a></li>');
     }
-    removeProgress();
-    scrollTo(0,1);
-    hijackLinks();
 }
 
 function loadBookDetail(title) {
@@ -173,6 +178,51 @@ function replaceBookData(book, title) {
     for(var idx in book.episodes) {
     	episodes.append('<li><a href="'+book.episodes[idx].url+'">'+book.episodes[idx].title+'</a></li>');
     }
+    
+    removeProgress();
+    scrollTo(0,1);
+    hijackLinks();
+}
+
+function loadSearch() {
+	$('body').load('search.html #container', function() {
+		var searchForm = $('#searchForm');
+		searchForm.submit(function(event){    
+		    search(); 
+		    event.preventDefault();
+		    return false;
+		});
+		handlePageChange('search.html');
+	});
+}
+
+function search(query) {
+	showProgress();
+	var keywords;
+	if(query == undefined) {
+		keywords = $('#search').attr('value');
+	} else {
+		keywords = query;
+	}
+	$.getJSON('resources/books/search', {keyword:keywords}, 
+        function(results) {
+		    $('body').load('search.html #container', function() {populateSearchResults(keywords, results);});
+	    });
+}
+
+function populateSearchResults(keywords, result) {
+    $('#backbutton').remove();
+    //Avoid making multiple searches new history entries...
+    var last = hist.shift();
+    if(last.title != 'Search') {
+    	hist.unshift(last);
+    }
+    hist.unshift(new History('Search', function() {search(keywords);}));
+    addBackButton();
+    
+    $('#search').attr('value', keywords);
+    
+    displayBookResults(result);
     
     removeProgress();
     scrollTo(0,1);

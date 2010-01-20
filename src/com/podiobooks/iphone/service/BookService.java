@@ -39,8 +39,16 @@ public interface BookService {
      * 
      * @param category  the name of the category of books to be retrieved
      * @return the list of books belonging to the specified category, with only
-     *         title and feedUrl populated.
+     *         title and feedUrl populated
      */
     public BookList getBooks(String category);
-
+    
+    /**
+     * Performs a search of all books for the given keywords.
+     * 
+     * @param keywords  the keywords to be used in the search
+     * @return the list of books matching the provided keywords with only the
+     *         title and feedUrl populated
+     */
+    public BookList searchBooks(String keywords);
 }

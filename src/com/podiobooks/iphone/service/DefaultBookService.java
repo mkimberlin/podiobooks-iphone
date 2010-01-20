@@ -1,5 +1,10 @@
 package com.podiobooks.iphone.service;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,13 +12,12 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-//import com.google.appengine.repackaged.org.apache.commons.logging.Log;
-//import com.google.appengine.repackaged.org.apache.commons.logging.LogFactory;
 import com.podiobooks.iphone.Book;
 import com.podiobooks.iphone.BookList;
 import com.podiobooks.iphone.Episode;
@@ -43,10 +47,11 @@ public class DefaultBookService implements BookService {
     private static final String TITLE_PLACEHOLDER = "__TITLE_PLACEHOLDER__";
     // TODO: Make this property or database driven...
     private static final String BASE_BOOK_FEED_URL = "http://podiobooks.com/title/"
-            + TITLE_PLACEHOLDER + "/feed";
+            + TITLE_PLACEHOLDER + "/feed/";
 
     private static final String ALL_BOOKS_FEED = "http://www.podiobooks.com/opml/all/";
 
+    private static final String BASE_SEARCH_URL = "http://www.podiobooks.com/podiobooks/search.php?includeAdult=1&keyword=";
     /**
      * {@inheritDoc}
      */
@@ -155,11 +160,46 @@ public class DefaultBookService implements BookService {
             if(bookNode.getNodeName().compareToIgnoreCase("outline") == 0) {
                 Book book = new Book();
                 book.setTitle(bookNode.getAttributes().getNamedItem("text").getNodeValue());
-                book.setUrl(bookNode.getAttributes().getNamedItem("url").getNodeValue());
+                book.setFeedUrl(bookNode.getAttributes().getNamedItem("url").getNodeValue());
                 books.add(book);
             }
         }
         return books;
+    }
+
+    @GET
+    @Path("search")
+    @Produces("application/json")
+    @Override
+    public BookList searchBooks(@QueryParam("keyword") String keywords) {
+        BookList bookList = new BookList();
+        try {keywords = URLEncoder.encode(keywords, "UTF-8");}catch(Exception e ) {}
+        List<Book> books = new ArrayList<Book>();
+        try {
+            URL url = new URL(BASE_SEARCH_URL+keywords);
+            BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+            StringBuilder result = new StringBuilder();
+            CharBuffer current = CharBuffer.allocate(1024);
+            while (in.read(current) != -1) {
+                result.append(current.array());
+                current.clear();
+            }
+            while(result.indexOf("/title/") >= 0) {
+                result.delete(0, result.indexOf("/title/")+7);
+                int nextPos = result.indexOf("/title/")+7;
+                int endPos = result.indexOf("\"", nextPos);
+                String titleUrlFragment = result.substring(nextPos, endPos);
+                result.delete(0, endPos);
+                String title = result.substring(result.indexOf(">")+1, result.indexOf("</a"));
+                result.delete(0, title.length()+4);
+                Book book = new Book();
+                book.setTitle(title);
+                book.setFeedUrl(BASE_BOOK_FEED_URL.replaceFirst(TITLE_PLACEHOLDER, titleUrlFragment));
+                books.add(book);
+            }
+        } catch (Exception e) {}
+        bookList.setBooks(books);
+        return bookList;
     }
 
 }

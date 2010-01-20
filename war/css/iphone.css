@@ -135,3 +135,7 @@ ul li a:active {
     -webkit-border-image: url(../images/back.png) 0 8 0 14;
     -webkit-tap-highlight-color: rgba(0,0,0,0);
 }
+
+#search {
+	fot-size: 18px;
+}
