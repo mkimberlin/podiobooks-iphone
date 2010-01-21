@@ -1,7 +1,5 @@
 package com.podiobooks.iphone.service;
 
-import java.util.List;
-
 import com.podiobooks.iphone.Book;
 import com.podiobooks.iphone.BookList;
 

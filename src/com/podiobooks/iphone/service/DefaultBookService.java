@@ -45,14 +45,11 @@ public class DefaultBookService implements BookService {
     FeedDao feedDao = new DefaultFeedDao();
 
     private static final String TITLE_PLACEHOLDER = "__TITLE_PLACEHOLDER__";
-    // TODO: Make this property or database driven...
+    // TODO: Make these property or database driven...
     private static final String BASE_BOOK_FEED_URL = "http://podiobooks.com/title/"
             + TITLE_PLACEHOLDER + "/feed/";
-
     private static final String ALL_BOOKS_FEED = "http://www.podiobooks.com/opml/all/";
-
     private static final String BASE_SEARCH_URL = "http://www.podiobooks.com/podiobooks/search.php?includeAdult=1&keyword=";
-    
     private static final String MAIN_URL = "http://www.podiobooks.com/";
     
     /**
@@ -62,12 +59,12 @@ public class DefaultBookService implements BookService {
     @Path("title/{title}")
     @Produces("application/json")
     @Override
-    @SuppressWarnings("unchecked")
     public Book getBook(@PathParam("title") String title) {
         String url = BASE_BOOK_FEED_URL.replaceFirst(TITLE_PLACEHOLDER, title);
         return getBookByFeedUrl(url);
     }
-
+    
+    @SuppressWarnings("unchecked")
     private Book getBookByFeedUrl(String url) {
         Book book = new Book();
         try {
@@ -194,7 +191,7 @@ public class DefaultBookService implements BookService {
                 String titleUrlFragment = result.substring(nextPos, endPos);
                 result.delete(0, endPos);
                 String title = result.substring(result.indexOf(">")+1, result.indexOf("</a"));
-                result.delete(0, title.length()+4);
+                result.delete(0, result.indexOf("</tr>"));
                 Book book = new Book();
                 book.setTitle(title);
                 book.setFeedUrl(BASE_BOOK_FEED_URL.replaceFirst(TITLE_PLACEHOLDER, titleUrlFragment));
