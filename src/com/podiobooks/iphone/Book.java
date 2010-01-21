@@ -16,7 +16,7 @@ public class Book {
 	private List<String> categories;
 	private String copyright;
 	private String url;
-	private Date lastUpdated;
+	private String lastUpdated;
 	private String imageUrl;
 	private String feedUrl;
 	private List<Episode> episodes;

@@ -62,12 +62,6 @@ function removeProgress() {
 }
 
 function hijackLinks() {
-//    var header = $('#header');
-//    if(header != undefined) {
-//        header.click(function(){
-//            loadPage('index.html');
-//        });
-//    }
     $('#content a.static').click(function(e){
         e.preventDefault();
         loadPage(e.target.href);
@@ -125,14 +119,19 @@ function displayBookResults(list) {
 	var books = list.books;
     var bookList = $("#books");
     if(books instanceof Array) {
-    for(var idx in books) {
-    	var bookTitle = books[idx].feedUrl.substring(books[idx].feedUrl.lastIndexOf('/title/')+7, books[idx].feedUrl.lastIndexOf('/feed'));
-    	bookList.append('<li><a href="#" onclick="javascript:loadBookDetail(\''+bookTitle+'\')">'+books[idx].title+'</a></li>');
-    }
+    	for(var idx in books) {
+    		bookList.append(createBookListItem(books[idx]));
+    	}
     } else {
-    	var bookTitle = books.feedUrl.substring(books.feedUrl.lastIndexOf('/title/')+7, books.feedUrl.lastIndexOf('/feed'));
-    	bookList.append('<li><a href="#" onclick="javascript:loadBookDetail(\''+bookTitle+'\')">'+books.title+'</a></li>');
+    	bookList.append(createBookListItem(books));
     }
+}
+
+function createBookListItem(book) {
+	var bookTitle = book.feedUrl.substring(book.feedUrl.lastIndexOf('/title/')+7, book.feedUrl.lastIndexOf('/feed'));
+	var listItem = '<li><a href="#" onclick="javascript:loadBookDetail(\''+bookTitle+'\')">'+book.title;
+	listItem = listItem + '<br/><span class="updateDate">Updated On: '+book.lastUpdated+'</span></a></li>';
+	return listItem;	
 }
 
 function loadBookDetail(title) {

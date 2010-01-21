@@ -1,12 +1,17 @@
 package com.podiobooks.iphone.service;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.CharBuffer;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -28,24 +33,32 @@ import com.sun.syndication.feed.synd.SyndCategory;
 import com.sun.syndication.feed.synd.SyndEnclosure;
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
+import com.sun.syndication.io.FeedException;
 import com.sun.syndication.io.SyndFeedInput;
 
 /**
  * The default implementation of the book service, exposing the methods as a
  * RESTful web service via the Jersey JAX-RS framework.
  * 
+ * Most of the data extraction in this service is done by "screen scraping" the
+ * current Podiobooks.com site (January, 2010) and is likely to break with any
+ * significant changes to the site.  Future implementations of these services
+ * will be done in tandem with the development of the new Podiobooks.com site.
+ * 
  * @author mkimberlin
+ * 
+ * TODO: Construct exception handling mechanism!
+ * TODO: Implement dependency injection?
  */
 @Path("books")
 @Singleton
 public class DefaultBookService implements BookService {
-//    private static final Log log = LogFactory.getLog(DefaultBookService.class);
-    
-    // TODO: Implement Guice injection...
+    private static final Logger log = Logger.getLogger(DefaultBookService.class.getName());
+     
     FeedDao feedDao = new DefaultFeedDao();
 
+    // TODO: Make these property driven...
     private static final String TITLE_PLACEHOLDER = "__TITLE_PLACEHOLDER__";
-    // TODO: Make these property or database driven...
     private static final String BASE_BOOK_FEED_URL = "http://podiobooks.com/title/"
             + TITLE_PLACEHOLDER + "/feed/";
     private static final String ALL_BOOKS_FEED = "http://www.podiobooks.com/opml/all/";
@@ -55,84 +68,19 @@ public class DefaultBookService implements BookService {
     /**
      * {@inheritDoc}
      */
-    @GET
-    @Path("title/{title}")
+    @GET @Path("title/{title}")
     @Produces("application/json")
-    @Override
-    public Book getBook(@PathParam("title") String title) {
+    @Override public Book getBook(@PathParam("title") String title) {
         String url = BASE_BOOK_FEED_URL.replaceFirst(TITLE_PLACEHOLDER, title);
         return getBookByFeedUrl(url);
     }
     
-    @SuppressWarnings("unchecked")
-    private Book getBookByFeedUrl(String url) {
-        Book book = new Book();
-        try {
-            Document doc = feedDao.retrieveFeed(url);
-            SyndFeedInput input = new SyndFeedInput();
-            SyndFeed feed = input.build(doc);
-            book.setTitle(feed.getTitle().substring(0,
-                feed.getTitle().indexOf(" - A free audiobook by")));
-            book.setCopyright(feed.getCopyright());
-            book.setDescription(feed.getDescription());
-            book.setImageUrl(feed.getImage().getUrl());
-            book.setLastUpdated(feed.getPublishedDate());
-            book.setCategories(parseCategoryNames(feed.getCategories()));
-            book.setUrl(feed.getLink());
-
-            book.setEpisodes(parseEpisodes(feed.getEntries()));
-
-            // Author is not provided as a part of the core RSS portion of the
-            // feed.  As such, it must be taken from the iTunes portion.
-            NodeList authorElems = doc.getElementsByTagName("itunes:author");
-            book.setAuthors(parseAuthors(authorElems));
-        } catch (Exception e) {
-//            log.error("An error occurred while retrieving or parsing the RSS feed: "
-//                + url, e);
-            book.setTitle(null);
-        }
-
-        return book;
-    }
-    
-    private List<String> parseAuthors(NodeList authorNodes) {
-        List<String> authors = new ArrayList<String>();
-        for(int i=0; i<authorNodes.getLength(); i++) {
-            Node authorNode = authorNodes.item(i);
-            if (authorNode != null) {
-                String author = authorNode.getTextContent();
-                if(!authors.contains(author) && !"Podiobooks Staff".equalsIgnoreCase(author))
-                    authors.add(author);
-            }    
-        }
-        return authors;
-    }
-
-    private List<Episode> parseEpisodes(List<SyndEntry> entries) {
-        List<Episode> episodes = new ArrayList<Episode>();
-        for (SyndEntry entry : entries) {
-            Episode ep = new Episode();
-            ep.setTitle(entry.getTitle());
-            // Assuming a single enclosure here. I think that is a safe bet.
-            ep.setUrl(((SyndEnclosure) entry.getEnclosures().get(0)).getUrl());
-            episodes.add(ep);
-        }
-        return episodes;
-    }
-
-    private List<String> parseCategoryNames(List<SyndCategory> categories) {
-        List<String> catNames = new ArrayList<String>();
-        for (SyndCategory cat : categories) {
-            catNames.add(cat.getName());
-        }
-        return catNames;
-    }
-
-    @GET
-    @Path("category/{category}")
+    /**
+     * {@inheritDoc} 
+     */
+    @GET @Path("category/{category}")
     @Produces("application/json")
-    @Override
-    public BookList getBooks(@PathParam("category")String category) {
+    @Override public BookList getBooks(@PathParam("category")String category) {
         category = category.replaceAll("-_-", "/");
         List<Book> books = new ArrayList<Book>();
         try {
@@ -146,17 +94,188 @@ public class DefaultBookService implements BookService {
                 }
             }
         } catch(Exception e) {
-//            log.error("An error occured while loading books for the category \"" +category+"\".", e);
+            log.warning("An error occurred while loading books for the category \"" +category+"\".");
+            e.printStackTrace();
         }
         BookList list = new BookList();
         list.setBooks(books);
         return list;
     }
+    
+    /**
+     * {@inheritDoc} 
+     */
+    @GET @Path("search")
+    @Produces("application/json")
+    @Override public BookList searchBooks(@QueryParam("keyword") String keywords) {
+        BookList bookList = new BookList();
+        try {keywords = URLEncoder.encode(keywords, "UTF-8");}catch(Exception e ) {}
+        try {
+            URL url = new URL(BASE_SEARCH_URL+keywords);
+            List<Book> books = new ArrayList<Book>();
+            books = extractSearchResults(url);
+            bookList.setBooks(books);
+        } catch (Exception e) {
+            log.warning("An unexpected error occurred while retrieving search results corresponding to: \""+keywords+"\"");
+            e.printStackTrace();
+            bookList.setBooks(new ArrayList<Book>());
+        }
+        
+        return bookList;
+    }
+    
+    /**
+     * {@inheritDoc} 
+     */
+    @GET @Path("recent")
+    @Produces("application/json")
+    @Override public BookList getRecentUpdates() {
+        BookList bookList = new BookList();
+        try {
+            URL url = new URL(MAIN_URL);
+            StringBuilder result = readContents(url);
+            
+            //Snip out the recent updates section...
+            result.delete(0, result.indexOf("<p>Recent Updates</p>"));
+            result.delete(result.indexOf("</ul>"), result.length());
+            
+            bookList.setBooks(extractRecentUpdates(result));
+        } catch (IOException e) {
+            log.warning("An unexpected error occurred while retrieving recent book updates.");
+            e.printStackTrace();
+            bookList.setBooks(new ArrayList<Book>());
+        }
+        return bookList;
+    }
+    
+    /**
+     * Retrieves a <code>Book</code> from its RSS feed at the provided URL. If
+     * an error occurs during the retrieval or processing of the feed, then
+     * an empty book will be returned.
+     * 
+     * @param url  the URL of the RSS feed
+     * @return the <code>Book</code> fully populated with information extracted
+     *         from the RSS feed
+     */
+    private Book getBookByFeedUrl(String url) {
+        Book book = null;
+        try {
+            Document doc = feedDao.retrieveFeed(url);
+            book = constructBookFromDetailedFeed(doc);
+        } catch (Exception e) {
+            log.warning("An error occurred while retrieving or parsing the RSS feed: "
+                + url);
+            e.printStackTrace();
+            book = new Book();
+        }
 
-    private List<Book> getBooks(NodeList categoryListing) {
+        return book;
+    }
+
+    /**
+     * Constructs a book object populated by the data taken from the
+     * provided RSS document.
+     * 
+     * @param doc  the <code>Document</code> containing the parsed RSS feed
+     * @return the <code>Book</code> fully populated with information extracted
+     *         from the RSS feed
+     * @throws FeedException  if the feed could not be parsed
+     */
+    @SuppressWarnings("unchecked")
+    private Book constructBookFromDetailedFeed(Document doc)
+            throws FeedException {
+        SyndFeedInput input = new SyndFeedInput();
+        SyndFeed feed = input.build(doc);
+        
+        Book book = new Book();
+        book.setTitle(feed.getTitle().substring(0,
+            feed.getTitle().indexOf(" - A free audiobook by")));
+        book.setCopyright(feed.getCopyright());
+        book.setDescription(feed.getDescription());
+        book.setImageUrl(feed.getImage().getUrl());
+        SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yy");
+        book.setLastUpdated(formatter.format(feed.getPublishedDate()));
+        book.setCategories(parseCategoryNames(feed.getCategories()));
+        book.setUrl(feed.getLink());
+
+        book.setEpisodes(parseEpisodes(feed.getEntries()));
+
+        book.setAuthors(parseAuthors(doc));
+        
+        return book;
+    }
+    
+    /**
+     * Parses any authors from the iTunes specific author tags, ignoring
+     * "Podiobooks Staff" that occurs for the "The End" or "Your caught up"
+     * files.
+     * 
+     * @param doc  the parsed RSS feed
+     * @return  a list of author names
+     */
+    private List<String> parseAuthors(Document doc) {
+        // Author is not provided as a part of the core RSS portion of the
+        // feed.  As such, it must be taken from the iTunes portion.
+        NodeList authorNodes = doc.getElementsByTagName("itunes:author");
+        
+        List<String> authors = new ArrayList<String>();
+        for(int i=0; i<authorNodes.getLength(); i++) {
+            Node authorNode = authorNodes.item(i);
+            if (authorNode != null) {
+                String author = authorNode.getTextContent();
+                if(!authors.contains(author) && !"Podiobooks Staff".equalsIgnoreCase(author))
+                    authors.add(author);
+            }    
+        }
+        return authors;
+    }
+
+    /**
+     * Parses a list of <code>Episode</code>s from a list of syndication entries
+     * taken from the feed.
+     * 
+     * @param entries  the list of <code>SyndEntry</code> parsed by ROME
+     * @return  a list of <code>Episode</code>s
+     */
+    private List<Episode> parseEpisodes(List<SyndEntry> entries) {
+        List<Episode> episodes = new ArrayList<Episode>();
+        for (SyndEntry entry : entries) {
+            Episode ep = new Episode();
+            ep.setTitle(entry.getTitle());
+            // Assuming a single enclosure here...
+            ep.setUrl(((SyndEnclosure) entry.getEnclosures().get(0)).getUrl());
+            episodes.add(ep);
+        }
+        return episodes;
+    }
+
+    /**
+     * Parses a the list of category names from those in the feed.
+     * 
+     * @param categories  a list of syndicated categories parsed by ROME
+     * @return a list of category names
+     */
+    private List<String> parseCategoryNames(List<SyndCategory> categories) {
+        List<String> catNames = new ArrayList<String>();
+        for (SyndCategory cat : categories) {
+            catNames.add(cat.getName());
+        }
+        return catNames;
+    }
+
+    /**
+     * Extracts a list of books from the <code>NodeList</code> of a category.
+     * It is assumed that there is no nesting and that all titles are "outline"
+     * entries in the provided <code>NodeList</code>.
+     * 
+     * @param bookNodes  the list of nodes containing the desired books
+     * @return a list of <code>Book</code>s with the title and feed url
+     *         populated
+     */
+    private List<Book> getBooks(NodeList bookNodes) {
         List<Book> books = new ArrayList<Book>();
-        for(int i=0; i<categoryListing.getLength(); i++) {
-            Node bookNode = categoryListing.item(i);
+        for(int i=0; i<bookNodes.getLength(); i++) {
+            Node bookNode = bookNodes.item(i);
             if(bookNode.getNodeName().compareToIgnoreCase("outline") == 0) {
                 Book book = new Book();
                 book.setTitle(bookNode.getAttributes().getNamedItem("text").getNodeValue());
@@ -167,78 +286,128 @@ public class DefaultBookService implements BookService {
         return books;
     }
 
-    @GET
-    @Path("search")
-    @Produces("application/json")
-    @Override
-    public BookList searchBooks(@QueryParam("keyword") String keywords) {
-        BookList bookList = new BookList();
-        try {keywords = URLEncoder.encode(keywords, "UTF-8");}catch(Exception e ) {}
+    /**
+     * Extracts a list of <code>Book</code>s resulting from a search.
+     * 
+     * @param url  the search page URL (including query string)
+     * @return a list of <code>Book</code>s matching the search
+     * @throws IOException  if an error occurs while retrieving the search
+     *         results from the site
+     */
+    private List<Book> extractSearchResults(URL url)
+            throws IOException {
         List<Book> books = new ArrayList<Book>();
-        try {
-            URL url = new URL(BASE_SEARCH_URL+keywords);
-            BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-            StringBuilder result = new StringBuilder();
-            CharBuffer current = CharBuffer.allocate(1024);
-            while (in.read(current) != -1) {
-                result.append(current.array());
-                current.clear();
-            }
-            while(result.indexOf("/title/") >= 0) {
-                result.delete(0, result.indexOf("/title/")+7);
-                int nextPos = result.indexOf("/title/")+7;
-                int endPos = result.indexOf("\"", nextPos);
-                String titleUrlFragment = result.substring(nextPos, endPos);
-                result.delete(0, endPos);
-                String title = result.substring(result.indexOf(">")+1, result.indexOf("</a"));
-                result.delete(0, result.indexOf("</tr>"));
-                Book book = new Book();
-                book.setTitle(title);
-                book.setFeedUrl(BASE_BOOK_FEED_URL.replaceFirst(TITLE_PLACEHOLDER, titleUrlFragment));
-                books.add(book);
-            }
-        } catch (Exception e) {}
-        bookList.setBooks(books);
-        return bookList;
+        
+        StringBuilder result = readContents(url);
+        while(result.indexOf("/title/") >= 0) {
+            result.delete(0, result.indexOf("/title/")+7);
+            int nextPos = result.indexOf("/title/")+7;
+            int endPos = result.indexOf("\"", nextPos);
+            String titleUrlFragment = result.substring(nextPos, endPos);
+            result.delete(0, endPos);
+            String title = result.substring(result.indexOf(">")+1, result.indexOf("</a"));
+            result.delete(0, result.indexOf("</tr>"));
+            Book book = new Book();
+            book.setTitle(title);
+            book.setFeedUrl(BASE_BOOK_FEED_URL.replaceFirst(TITLE_PLACEHOLDER, titleUrlFragment));
+            books.add(book);
+        }
+        return books;
     }
-    
-    @GET
-    @Path("recent")
-    @Produces("application/json")
-    @Override
-    public BookList getRecentUpdates() {
-        BookList bookList = new BookList();
-        List<Book> books = new ArrayList<Book>();
-        try {
-            URL url = new URL(MAIN_URL);
-            BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-            StringBuilder result = new StringBuilder();
-            CharBuffer current = CharBuffer.allocate(1024);
-            while (in.read(current) != -1) {
-                result.append(current.array());
-                current.clear();
-            }
-            //Snip out the recent updates section...
-            result.delete(0, result.indexOf("<p>Recent Updates</p>"));
-            result.delete(result.indexOf("</ul>"), result.length());
+
+    /**
+     * Extracts a list of <code>Book</code>s recently updated from the site's
+     * front page.  The number of episodes updated is appended to the book's
+     * title.
+     * 
+     * @param result  the recent updates section of the podiobooks.com main page 
+     * @return the list of <code>Book</code>s recently updated, with each
+     *         book's title, last updated date and feed url populated and
+     *         the number of episodes updated appended to the book's title
+     */
+    private List<Book> extractRecentUpdates(StringBuilder result) {
+        List<Book> books = new ArrayList<Book>();        
+        Pattern datePattern = Pattern.compile("(0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])[- /.]\\d\\d");
+        Pattern episodePattern = Pattern.compile("\\s\\d+\\D");
+        while(result.indexOf("/title/") >= 0) {
+            //Match the date and number of episodes
+            String date = getFirstMatch(result, datePattern);
+            String episodes = getFirstMatch(result, episodePattern);
+            episodes = episodes.substring(0, episodes.length()-1).trim();
             
-            while(result.indexOf("/title/") >= 0) {
-                int nextPos = result.indexOf("/title/")+7;
-                int endPos = result.indexOf("/\"", nextPos);
-                String titleUrlFragment = result.substring(nextPos, endPos);
-                result.delete(0, endPos);
-                nextPos = result.indexOf(">")+1;
-                endPos = result.indexOf("</a");
-                String title = result.substring(nextPos, endPos);
-                result.delete(0, endPos);
-                Book book = new Book();
-                book.setTitle(title);
-                book.setFeedUrl(BASE_BOOK_FEED_URL.replaceFirst(TITLE_PLACEHOLDER, titleUrlFragment));
-                books.add(book);
-            }
-        } catch (Exception e) {}
-        bookList.setBooks(books);
-        return bookList;
+            //Extract the title fragment from the href
+            int nextPos = result.indexOf("/title/")+7;
+            int endPos = result.indexOf("/\"", nextPos);
+            String titleUrlFragment = result.substring(nextPos, endPos);
+            result.delete(0, endPos);
+
+            //Extract the book title
+            nextPos = result.indexOf(">")+1;
+            endPos = result.indexOf("</a");
+            String title = result.substring(nextPos, endPos);
+            result.delete(0, endPos);
+            
+            StringBuilder titleBuilder = new StringBuilder(title);
+            titleBuilder.append(" - ").append(episodes).append(" Episodes");
+            Book book = constructBook(date, titleUrlFragment, titleBuilder.toString());
+            books.add(book);
+        }
+        return books;
+    }
+
+    /**
+     * Reads the entire contents of the file at the provided URL into a
+     * StringBuilder for processing.
+     * 
+     * @param url  the URL to be read
+     * @return the contents of the file referenced by the URL
+     * @throws IOException  if an error occurs while retrieving the contents of
+     *         the file
+     */
+    private StringBuilder readContents(URL url) throws IOException {
+        BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+        StringBuilder result = new StringBuilder();
+        CharBuffer current = CharBuffer.allocate(1024);
+        while (in.read(current) != -1) {
+            result.append(current.array());
+            current.clear();
+        }
+        return result;
+    }
+
+    /**
+     * Constructs a <code>Book</code> from the given title, update date and
+     * feed URL fragment.
+     * 
+     * @param date  the date the book was last updated
+     * @param titleUrlFragment  the portion of the feed URL specifying that
+     *        is unique to this book (i.e. "the-rookie" or "ravenwood")
+     * @param title  the full title of the book
+     * @return  the populated <code>Book</code> object
+     */
+    private Book constructBook(String date, String titleUrlFragment,
+            String title) {
+        Book book = new Book();
+        book.setTitle(title);
+        book.setFeedUrl(BASE_BOOK_FEED_URL.replaceFirst(TITLE_PLACEHOLDER, titleUrlFragment));
+        book.setLastUpdated(date);
+        return book;
+    }
+
+    /**
+     * Retrieves the first string in a <code>CharSequence</code> matching the
+     * provided pattern. 
+     * 
+     * @param toMatch  the <code>CharSequence</code> to perform the match against
+     * @param pattern  the regular expression to be matched
+     * @return the first string in the CharSequence that matches the given
+     *         pattern
+     */
+    private String getFirstMatch(CharSequence toMatch, Pattern pattern) {
+        Matcher matcher = pattern.matcher(toMatch);
+        matcher.find();
+        String date = matcher.group();
+        return date;
     }
 
 }
