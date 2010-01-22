@@ -137,6 +137,22 @@ function createBookListItem(book) {
 	return listItem;	
 }
 
+function loadRandom(category) {
+	showProgress();
+	var resource = 'resources/books/random';
+	if(category != undefined) {
+		resource = resource+"/"+category;
+	}
+    $.getJSON(resource,
+        function(book){
+    	    $('body').load('detail.html #container',
+    	    	function() {
+    	    		var title = book.feedUrl.substring(book.feedUrl.lastIndexOf('/title/')+7, book.feedUrl.lastIndexOf('/feed'));
+    	    		replaceBookData(book, title);
+    	    	});
+        });
+}
+
 function loadBookDetail(title) {
 	showProgress();
     $.getJSON('resources/books/title/'+title,

@@ -5,7 +5,9 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Random;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
@@ -52,6 +54,7 @@ public class DefaultBookService extends SiteParsingService implements BookServic
     private static final Logger log = Logger.getLogger(DefaultBookService.class.getName());
      
     FeedDao feedDao = new DefaultFeedDao();
+    Random random = new Random(new Date().getTime());
 
     // TODO: Make these property driven...
     private static final String ALL_BOOKS_FEED = "http://www.podiobooks.com/opml/all/";
@@ -74,7 +77,8 @@ public class DefaultBookService extends SiteParsingService implements BookServic
     @GET @Path("category/{category}")
     @Produces("application/json")
     @Override public BookList getBooks(@PathParam("category")String category) {
-        category = category.replaceAll("-_-", "/");
+        if(category != null)
+            category = category.replaceAll("-_-", "/");
         List<Book> books = new ArrayList<Book>();
         try {
             Document doc = feedDao.retrieveFeed(ALL_BOOKS_FEED);
@@ -82,8 +86,9 @@ public class DefaultBookService extends SiteParsingService implements BookServic
             for(int i=0; i<children.getLength(); i++) {
                 Node child = children.item(i);
                 if(child.getNodeName().compareToIgnoreCase("outline") == 0
-                    && child.getAttributes().getNamedItem("text").getNodeValue().compareToIgnoreCase(category) == 0) {
-                    books = getBooks(child.getChildNodes());
+                    && (category == null || category.trim().length()==0 ||
+                        child.getAttributes().getNamedItem("text").getNodeValue().compareToIgnoreCase(category) == 0)) {
+                    books.addAll(getBooks(child.getChildNodes()));
                 }
             }
         } catch(Exception e) {
@@ -139,6 +144,29 @@ public class DefaultBookService extends SiteParsingService implements BookServic
             bookList.setBooks(new ArrayList<Book>());
         }
         return bookList;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @GET @Path("random/{category}")
+    @Produces("application/json")
+    @Override public Book getRandomBook(@PathParam("category") String category) {
+        BookList books = getBooks(category);
+        Book book = books.getBooks().get(random.nextInt(books.getBooks().size()));
+        String feedUrl = book.getFeedUrl();
+        book = getBook(feedUrl.substring(feedUrl.indexOf("/title/")+7,feedUrl.indexOf("/feed")));
+        book.setFeedUrl(feedUrl);
+        return book;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @GET @Path("random")
+    @Produces("application/json")
+    @Override public Book getRandomBook() {
+        return getRandomBook(null);
     }
     
     /**

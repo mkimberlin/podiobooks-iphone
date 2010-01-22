@@ -28,7 +28,8 @@ public interface BookService {
     public Book getBook(String title);
     
     /**
-     * Retrieves the list of all books belonging to the provided category.
+     * Retrieves the list of all books belonging to the provided category. If
+     * no category is provided, then the complete set of books will be returned.
      * 
      * Since this service is making use of the current podiobooks.com site,
      * the category must be specified by name (ids are not available in the
@@ -57,4 +58,25 @@ public interface BookService {
      *         and feedUrl populated
      */
     public BookList getRecentUpdates();
+    
+    /**
+     * Retrieves a random title from the complete set of titles in a given
+     * category.  If no category is provided, then the title is selected
+     * from the complete list of works.
+     * 
+     * @param category  the category from which the book should be selected,
+     *        null if the book should be selected from all titles
+     * @return the detailed Book information, including currently available
+     *          episodes, from a randomly selected title
+     */
+    public Book getRandomBook(String category);
+    
+    /**
+     * Behaves as if calling <code>getRandomBook(String category)</code> with
+     * a null category.
+     * 
+     * @return the detailed Book information, including currently available
+     *          episodes, from a randomly selected title
+     */
+    public Book getRandomBook();
 }
