@@ -130,7 +130,10 @@ function displayBookResults(list) {
 function createBookListItem(book) {
 	var bookTitle = book.feedUrl.substring(book.feedUrl.lastIndexOf('/title/')+7, book.feedUrl.lastIndexOf('/feed'));
 	var listItem = '<li><a href="#" onclick="javascript:loadBookDetail(\''+bookTitle+'\')">'+book.title;
-	listItem = listItem + '<br/><span class="updateDate">Updated On: '+book.lastUpdated+'</span></a></li>';
+	if(book.lastUpdated != undefined) {
+		listItem = listItem + '<br/><span class="updateDate">Updated On: '+book.lastUpdated+'</span>';
+	}
+	listItem = listItem + '</a></li>';
 	return listItem;	
 }
 
@@ -239,17 +242,69 @@ function populateSearchResults(keywords, result) {
 function loadRecent() {
 	showProgress();
 	$.getJSON('resources/books/recent',
+		function(updates) {
+	    	$('body').load('books.html #container', function() {
+	    		populateBookResults('Recent Updates', updates, loadRecent);
+	    	});
+    	});
+}
+
+function loadTopTen() {
+	showProgress();
+	$.getJSON('resources/stats/top',
         function(updates) {
-		    $('body').load('books.html #container', function() {populateRecent(updates);});
+		    $('body').load('books.html #container', function() {
+		    	populateBookResults('Top Ten', updates, loadTopTen);
+		    });
 	    });
 }
 
-function populateRecent(list) {
+function loadTodaysTop() {
+	showProgress();
+	$.getJSON('resources/stats/today',
+        function(updates) {
+		    $('body').load('books.html #container', function() {
+		    	populateBookResults('Today\'s Top', updates, loadTopTen);
+		    });
+	    });
+}
+
+function loadTopOverall() {
+	showProgress();
+	$.getJSON('resources/stats/overall',
+        function(updates) {
+		    $('body').load('books.html #container', function() {
+		    	populateBookResults('Top Rated', updates, loadTopTen);
+		    });
+	    });
+}
+
+function loadTopByVotes() {
+	showProgress();
+	$.getJSON('resources/stats/topbyvotes',
+        function(updates) {
+		    $('body').load('books.html #container', function() {
+		    	populateBookResults('Top By Votes', updates, loadTopTen);
+		    });
+	    });
+}
+
+function loadTopAllTime() {
+	showProgress();
+	$.getJSON('resources/stats/alltime',
+        function(updates) {
+		    $('body').load('books.html #container', function() {
+		    	populateBookResults('All Time Top', updates, loadTopTen);
+		    });
+	    });
+}
+
+function populateBookResults(title, list, historyFunction) {
 	var headerText = $('#header h1');
-	headerText.text('Recent Updates');
+	headerText.text(title);
 	
     $('#backbutton').remove();
-    hist.unshift(new History('Recent Updates', loadRecent));
+    hist.unshift(new History(title, historyFunction));
     addBackButton();
 	
     displayBookResults(list);

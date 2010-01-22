@@ -2,6 +2,7 @@ package com.podiobooks.iphone.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -21,7 +22,7 @@ import com.sun.jersey.spi.resource.Singleton;
 @Path("category")
 @Singleton
 public class DefaultCategoryService implements CategoryService {
-//    private static final Log log = LogFactory.getLog(DefaultCategoryService.class);
+    private static final Logger log = Logger.getLogger(DefaultCategoryService.class.getName());
     
     private static final String ALL_BOOKS_FEED = "http://www.podiobooks.com/opml/all/";
     
@@ -44,7 +45,7 @@ public class DefaultCategoryService implements CategoryService {
                 }
             }
         } catch(Exception e) {
-//            log.error("An error occurred while retrieving the complete list of categories.");
+            log.warning("An error occurred while retrieving the complete list of categories: " + e.getMessage());
         }
         CategoryList list = new CategoryList();
         list.setCategories(categories);

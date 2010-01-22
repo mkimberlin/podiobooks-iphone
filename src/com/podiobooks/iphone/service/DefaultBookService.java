@@ -1,16 +1,12 @@
 package com.podiobooks.iphone.service;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.nio.CharBuffer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.ws.rs.GET;
@@ -52,15 +48,12 @@ import com.sun.syndication.io.SyndFeedInput;
  */
 @Path("books")
 @Singleton
-public class DefaultBookService implements BookService {
+public class DefaultBookService extends SiteParsingService implements BookService {
     private static final Logger log = Logger.getLogger(DefaultBookService.class.getName());
      
     FeedDao feedDao = new DefaultFeedDao();
 
     // TODO: Make these property driven...
-    private static final String TITLE_PLACEHOLDER = "__TITLE_PLACEHOLDER__";
-    private static final String BASE_BOOK_FEED_URL = "http://podiobooks.com/title/"
-            + TITLE_PLACEHOLDER + "/feed/";
     private static final String ALL_BOOKS_FEED = "http://www.podiobooks.com/opml/all/";
     private static final String BASE_SEARCH_URL = "http://www.podiobooks.com/podiobooks/search.php?includeAdult=1&keyword=";
     private static final String MAIN_URL = "http://www.podiobooks.com/";
@@ -94,7 +87,7 @@ public class DefaultBookService implements BookService {
                 }
             }
         } catch(Exception e) {
-            log.warning("An error occurred while loading books for the category \"" +category+"\".");
+            log.warning("An error occurred while loading books for the category \"" +category+"\": " + e.getMessage());
             e.printStackTrace();
         }
         BookList list = new BookList();
@@ -116,7 +109,7 @@ public class DefaultBookService implements BookService {
             books = extractSearchResults(url);
             bookList.setBooks(books);
         } catch (Exception e) {
-            log.warning("An unexpected error occurred while retrieving search results corresponding to: \""+keywords+"\"");
+            log.warning("An unexpected error occurred while retrieving search results corresponding to: \""+keywords+"\": " + e.getMessage());
             e.printStackTrace();
             bookList.setBooks(new ArrayList<Book>());
         }
@@ -141,7 +134,7 @@ public class DefaultBookService implements BookService {
             
             bookList.setBooks(extractRecentUpdates(result));
         } catch (IOException e) {
-            log.warning("An unexpected error occurred while retrieving recent book updates.");
+            log.warning("An unexpected error occurred while retrieving recent book updates: " + e.getMessage());
             e.printStackTrace();
             bookList.setBooks(new ArrayList<Book>());
         }
@@ -163,8 +156,8 @@ public class DefaultBookService implements BookService {
             Document doc = feedDao.retrieveFeed(url);
             book = constructBookFromDetailedFeed(doc);
         } catch (Exception e) {
-            log.warning("An error occurred while retrieving or parsing the RSS feed: "
-                + url);
+            log.warning("An error occurred while retrieving or parsing the RSS feed \""
+                + url + "\": " + e.getMessage());
             e.printStackTrace();
             book = new Book();
         }
@@ -307,9 +300,7 @@ public class DefaultBookService implements BookService {
             result.delete(0, endPos);
             String title = result.substring(result.indexOf(">")+1, result.indexOf("</a"));
             result.delete(0, result.indexOf("</tr>"));
-            Book book = new Book();
-            book.setTitle(title);
-            book.setFeedUrl(BASE_BOOK_FEED_URL.replaceFirst(TITLE_PLACEHOLDER, titleUrlFragment));
+            Book book = constructBook(null, titleUrlFragment, title);
             books.add(book);
         }
         return books;
@@ -353,61 +344,6 @@ public class DefaultBookService implements BookService {
             books.add(book);
         }
         return books;
-    }
-
-    /**
-     * Reads the entire contents of the file at the provided URL into a
-     * StringBuilder for processing.
-     * 
-     * @param url  the URL to be read
-     * @return the contents of the file referenced by the URL
-     * @throws IOException  if an error occurs while retrieving the contents of
-     *         the file
-     */
-    private StringBuilder readContents(URL url) throws IOException {
-        BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-        StringBuilder result = new StringBuilder();
-        CharBuffer current = CharBuffer.allocate(1024);
-        while (in.read(current) != -1) {
-            result.append(current.array());
-            current.clear();
-        }
-        return result;
-    }
-
-    /**
-     * Constructs a <code>Book</code> from the given title, update date and
-     * feed URL fragment.
-     * 
-     * @param date  the date the book was last updated
-     * @param titleUrlFragment  the portion of the feed URL specifying that
-     *        is unique to this book (i.e. "the-rookie" or "ravenwood")
-     * @param title  the full title of the book
-     * @return  the populated <code>Book</code> object
-     */
-    private Book constructBook(String date, String titleUrlFragment,
-            String title) {
-        Book book = new Book();
-        book.setTitle(title);
-        book.setFeedUrl(BASE_BOOK_FEED_URL.replaceFirst(TITLE_PLACEHOLDER, titleUrlFragment));
-        book.setLastUpdated(date);
-        return book;
-    }
-
-    /**
-     * Retrieves the first string in a <code>CharSequence</code> matching the
-     * provided pattern. 
-     * 
-     * @param toMatch  the <code>CharSequence</code> to perform the match against
-     * @param pattern  the regular expression to be matched
-     * @return the first string in the CharSequence that matches the given
-     *         pattern
-     */
-    private String getFirstMatch(CharSequence toMatch, Pattern pattern) {
-        Matcher matcher = pattern.matcher(toMatch);
-        matcher.find();
-        String date = matcher.group();
-        return date;
     }
 
 }
