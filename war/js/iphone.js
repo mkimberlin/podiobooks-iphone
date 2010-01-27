@@ -47,6 +47,19 @@ function handlePageChange(historyFunction, title) {
     scrollTo(0,1);
 }
 
+function loadPlayer(url) {
+	$('body').load('play.html #container', function() {
+      $('#backbutton').remove();
+      hist.unshift(new History('Play Episode', function(){loadPlayer(url);}));
+      addBackButton();
+      
+      $('#content>div').append('<embed height="100px" width="100px" target="myself" type="audio/mpeg" loop="false" href="'+url+'"></embed>');
+      
+      removeProgress();
+      scrollTo(0,1);
+	});
+}
+
 function addBackButton(){
     if(hist.length > 1) {
         $('#header').prepend('<span id="backButton">'+hist[1].title+'</span>');
@@ -192,7 +205,7 @@ function replaceBookData(book, title) {
     
     var episodes = $("#episodes");
     for(var idx in book.episodes) {
-        episodes.append('<li><a href="'+book.episodes[idx].url+'">'+book.episodes[idx].title+'</a></li>');
+        episodes.append('<li><a href="#" onclick="javascript:loadPlayer(\''+book.episodes[idx].url+'\');">'+book.episodes[idx].title+'</a></li>');
     }
 }
 

@@ -116,7 +116,6 @@ ul li a:active {
 	z-index:1;			/* needed and important */
 	width:320px;
 	height:465px;		/* needed */
-	overflow:hidden;	/* suggested */
 }
 
 #content {
