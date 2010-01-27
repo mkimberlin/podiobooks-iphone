@@ -8,16 +8,23 @@
     <link rel="stylesheet" type="text/css" href="css/iphone.css" />
     <link rel="apple-touch-startup-image" href="images/startup.png" />
     <script type="text/javascript" src="js/jquery.js"></script>
+    <script type="text/javascript" src="js/iscroll.js"></script>
     <script type="text/javascript" src="js/iphone.js"></script>
+    <script type="text/javascript">
+    	$(document).ready(function(){ 
+        	loadPage();
+    	});
+    </script>
     <title>Podiobooks.com</title>
   </head>
 
   <body>
     <div id="container">
-    <div id="header">      
-      <img id="logo" src="images/logo.png" height="44" width="60" />
-      <h1>Podiobooks.com</h1>
+    <div id="header">
+      <h1 style="">Podiobooks.com</h1>
     </div>
+    <div id="logo"><img src="images/logo.png" height="44" width="60"></div>
+    <div id="wrapper">
     <div id="content">
       <ul>
         <li><a href="hot.html" class="static">What's Hot</a></li>
@@ -27,6 +34,7 @@
         <li><a href="#" onclick="javascript:loadSearch()">Search for Books</a></li> 
         <!-- <li><a href="#" onclick="javascript:loadNews()">Podiobooks News</a></li> -->
       </ul>
+    </div>
     </div>
     </div>
   </body>

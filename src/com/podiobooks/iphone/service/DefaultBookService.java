@@ -92,7 +92,7 @@ public class DefaultBookService extends SiteParsingService implements BookServic
                 }
             }
         } catch(Exception e) {
-            log.warning("An error occurred while loading books for the category \"" +category+"\": " + e.getMessage());
+            log.severe("An error occurred while loading books for the category \"" +category+"\": " + e.getMessage());
             e.printStackTrace();
         }
         BookList list = new BookList();
@@ -114,7 +114,7 @@ public class DefaultBookService extends SiteParsingService implements BookServic
             books = extractSearchResults(url);
             bookList.setBooks(books);
         } catch (Exception e) {
-            log.warning("An unexpected error occurred while retrieving search results corresponding to: \""+keywords+"\": " + e.getMessage());
+            log.severe("An unexpected error occurred while retrieving search results corresponding to: \""+keywords+"\": " + e.getMessage());
             e.printStackTrace();
             bookList.setBooks(new ArrayList<Book>());
         }
@@ -139,7 +139,7 @@ public class DefaultBookService extends SiteParsingService implements BookServic
             
             bookList.setBooks(extractRecentUpdates(result));
         } catch (IOException e) {
-            log.warning("An unexpected error occurred while retrieving recent book updates: " + e.getMessage());
+            log.severe("An unexpected error occurred while retrieving recent book updates: " + e.getMessage());
             e.printStackTrace();
             bookList.setBooks(new ArrayList<Book>());
         }
@@ -184,7 +184,7 @@ public class DefaultBookService extends SiteParsingService implements BookServic
             Document doc = feedDao.retrieveFeed(url);
             book = constructBookFromDetailedFeed(doc);
         } catch (Exception e) {
-            log.warning("An error occurred while retrieving or parsing the RSS feed \""
+            log.severe("An error occurred while retrieving or parsing the RSS feed \""
                 + url + "\": " + e.getMessage());
             e.printStackTrace();
             book = new Book();
@@ -222,7 +222,7 @@ public class DefaultBookService extends SiteParsingService implements BookServic
         book.setEpisodes(parseEpisodes(feed.getEntries()));
 
         book.setAuthors(parseAuthors(doc));
-        
+        scrubBook(book);
         return book;
     }
     
@@ -301,6 +301,7 @@ public class DefaultBookService extends SiteParsingService implements BookServic
                 Book book = new Book();
                 book.setTitle(bookNode.getAttributes().getNamedItem("text").getNodeValue());
                 book.setFeedUrl(bookNode.getAttributes().getNamedItem("url").getNodeValue());
+                scrubBook(book);
                 books.add(book);
             }
         }

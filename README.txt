@@ -1,17 +1,41 @@
-Podiobooks.com on your iPhone!
+*** Podiobooks.com on your iPhone! ***
 
 Installation Instructions:
 
 1.) In Mobile Safari go to: http://podiobooks-player.appspot.com
 2.) Hit the "+" button at the bottom of Mobile Safari
 3.) Select "Add to Home Screen"
-4.) Change the name to whatever you want (I suggest "Podiobooks", as "Podiobooks.com" will result in "Podio...s.com".)
+4.) Change the name to whatever you want (I suggest "Podiobooks",
+    as "Podiobooks.com" will result in "Podio...s.com".)
 5.) Click the icon and enjoy
 
 Log any issues that you might find at:
 
 http://github.com/mkimberlin/podiobooks-iphone/issues
 
+Please search any existing issues for your problem before creating a new one.
+
+I am also looking for input and suggestions for the layout and style of the
+application.  If you happen to be a UI guru or have an eye for style and art,
+I would be happy to hear your thoughts and suggestions.  The application is
+currently functional, but not particularly beautiful.  I would love to see that
+change.  Feel free to contact me on twitter or via email (mkimberlin at gmail).
+
+You can follow me on twitter (@mkimberlin) for any updates on the current status
+of the application.
+
+Be aware that the current version of the application obtains almost all of its
+data by scraping the Podiobooks.com site.  As such it is subject to the whims of
+the site.  If the site is experiencing difficulty, then the application will as
+well.  This also means that we are limited to pulling only the information that
+is available on the site.  This is currently only limiting the "Recent Updates"
+portion of the application.  The site only shows the last five titles to be
+updated.  So days with heavy updates will push some recent update off a bit
+prematurely.  I am working with the team that is implementing the new Podiobooks
+site design and should be able to overcome these issues once the new site goes
+live.
+
+Thanks for your interest in the application and enjoy!
 
  .      .... I+=:,,,,:::::::::::::::,::::,:,,:,::::,,,,::,,,:,::,:,,,,,,,,,,,,,,,,.:~=I?.. .      ..
 ..  ..... I::Z$+:...................................................................,+ZZ::Z .       

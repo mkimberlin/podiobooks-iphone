@@ -45,7 +45,7 @@ public class DefaultCategoryService implements CategoryService {
                 }
             }
         } catch(Exception e) {
-            log.warning("An error occurred while retrieving the complete list of categories: " + e.getMessage());
+            log.severe("An error occurred while retrieving the complete list of categories: " + e.getMessage());
         }
         CategoryList list = new CategoryList();
         list.setCategories(categories);

@@ -38,7 +38,7 @@ public class DefaultStatisticsService extends SiteParsingService implements Stat
             
             bookList.setBooks(extractBooksFromListItems(result));
         } catch (IOException e) {
-            log.warning("An unexpected error occurred while retrieving today's top subscriptions: " + e.getMessage());
+            log.severe("An unexpected error occurred while retrieving today's top subscriptions: " + e.getMessage());
             e.printStackTrace();
             bookList.setBooks(new ArrayList<Book>());
         }
@@ -63,7 +63,7 @@ public class DefaultStatisticsService extends SiteParsingService implements Stat
             
             bookList.setBooks(extractBooksFromListItems(result));
         } catch (IOException e) {
-            log.warning("An unexpected error occurred while retrieving top ten subscriptions: " + e.getMessage());
+            log.severe("An unexpected error occurred while retrieving top ten subscriptions: " + e.getMessage());
             e.printStackTrace();
             bookList.setBooks(new ArrayList<Book>());
         }
@@ -87,7 +87,7 @@ public class DefaultStatisticsService extends SiteParsingService implements Stat
             
             bookList.setBooks(extractBooksFromListItems(result));
         } catch (IOException e) {
-            log.warning("An unexpected error occurred while retrieving top overall ratings: " + e.getMessage());
+            log.severe("An unexpected error occurred while retrieving top overall ratings: " + e.getMessage());
             e.printStackTrace();
             bookList.setBooks(new ArrayList<Book>());
         }
@@ -111,7 +111,7 @@ public class DefaultStatisticsService extends SiteParsingService implements Stat
             
             bookList.setBooks(extractBooksFromListItems(result));
         } catch (IOException e) {
-            log.warning("An unexpected error occurred while retrieving top ratings by votes: " + e.getMessage());
+            log.severe("An unexpected error occurred while retrieving top ratings by votes: " + e.getMessage());
             e.printStackTrace();
             bookList.setBooks(new ArrayList<Book>());
         }
@@ -135,7 +135,7 @@ public class DefaultStatisticsService extends SiteParsingService implements Stat
             
             bookList.setBooks(extractBooksFromListItems(result));
         } catch (IOException e) {
-            log.warning("An unexpected error occurred while retrieving today's top all time subscriptions: " + e.getMessage());
+            log.severe("An unexpected error occurred while retrieving today's top all time subscriptions: " + e.getMessage());
             e.printStackTrace();
             bookList.setBooks(new ArrayList<Book>());
         }
