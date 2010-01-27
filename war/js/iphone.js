@@ -147,6 +147,7 @@ function loadRandom(category) {
                 function() {
                     var title = book.feedUrl.substring(book.feedUrl.lastIndexOf('/title/')+7, book.feedUrl.lastIndexOf('/feed'));
                     replaceBookData(book, title);
+                    handlePageChange(function() {loadBookDetail(title);});
                 });
         });
 }
@@ -217,13 +218,14 @@ function search(query) {
     }
     $.getJSON('resources/books/search', {keyword:keywords}, 
         function(results) {
-            $('body').load('search.html #container', function() {populateSearchResults(keywords, results);});
+            $('body').load('search.html #container', function() {
+            	populateSearchResults(keywords, results);
+            	handlePageChange(function() {search(keywords);}, 'Search');
+            });
         });
 }
 
 function populateSearchResults(keywords, result) {
-    $('#backbutton').remove();
-    
     var searchForm = $('#searchForm');
     searchForm.submit(function(event){    
         search(); 
@@ -236,16 +238,10 @@ function populateSearchResults(keywords, result) {
     if(last.title != 'Search') {
         hist.unshift(last);
     }
-    hist.unshift(new History('Search', function() {search(keywords);}));
-    addBackButton();
-    
+
     $('#search').attr('value', keywords);
     
     displayBookResults(result);
-    
-    removeProgress();
-    scrollTo(0,1);
-    hijackLinks();
 }
 
 function loadRecent() {
