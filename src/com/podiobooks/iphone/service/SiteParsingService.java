@@ -37,7 +37,7 @@ public class SiteParsingService {
                 in = new BufferedReader(new InputStreamReader(url.openStream()));
             } catch(IOException e) {
               log.warning(e.getMessage());
-              if(i==RETRY_COUNT) 
+              if(i==RETRY_COUNT-1) 
                   throw e;
             }
         }
