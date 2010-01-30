@@ -80,7 +80,7 @@ ul {
     margin-top: 0px;
 }
 
-ul li a {
+ul li.linkItem {
     background-color: #FFF;
     border: 1px solid #999;
     color: #222;
@@ -92,23 +92,31 @@ ul li a {
     text-decoration: none;
 }
 
-ul li:first-child a {
+ul li.linkItem a {
+	color: #222;
+    text-decoration: none;	
+}
+
+ul li:first-child.linkItem {
     -webkit-border-top-left-radius: 8px;
     -webkit-border-top-right-radius: 8px;
 }
 
-ul li:last-child a {
+ul li:last-child.linkItem {
     -webkit-border-bottom-left-radius: 8px;
     -webkit-border-bottom-right-radius: 8px;
 }
 
-ul li a:active {
-    background-color:blue;
-    color:white;
+ul li.linkItem a:active {
+    color: #222;
 }
 
 .updateDate {
 	font-size: 12px;
+}
+
+.playEpisode {
+	font-size: 14px;
 }
 
 #wrapper {

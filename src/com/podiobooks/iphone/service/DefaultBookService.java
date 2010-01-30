@@ -265,6 +265,8 @@ public class DefaultBookService extends SiteParsingService implements BookServic
             ep.setTitle(entry.getTitle());
             // Assuming a single enclosure here...
             ep.setUrl(((SyndEnclosure) entry.getEnclosures().get(0)).getUrl());
+            SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yy");
+            ep.setPublicationDate(formatter.format(entry.getPublishedDate()));
             episodes.add(ep);
         }
         return episodes;

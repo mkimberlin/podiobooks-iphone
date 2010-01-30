@@ -1,5 +1,6 @@
 var hist = [];
 var start = new History('Home', function() {loadPage('index.html');});
+var episodes;
 
 function loadPage(url) {
     showProgress();
@@ -47,13 +48,27 @@ function handlePageChange(historyFunction, title) {
     scrollTo(0,1);
 }
 
-function loadPlayer(url) {
+function loadPlayer(epIdx, playAll) {
 	$('body').load('play.html #container', function() {
       $('#backbutton').remove();
       hist.unshift(new History('Play Episode', function(){loadPlayer(url);}));
       addBackButton();
       
-      $('#content>div').append('<embed height="100px" width="100px" target="myself" type="audio/mpeg" loop="false" href="'+url+'"></embed>');
+      var player = '<embed height="100px" width="100px" target="myself" type="audio/mpeg" loop="false" href="'+episodes[epIdx].url+'" ';
+      
+      var nextId = 1;
+      if(playAll != undefined) {
+        for(var idx in episodes) {
+        	if(idx > epIdx) {
+        		player = player + 'qtnext'+nextId+'="<'+episodes[idx].url+'> T<myself>" ';
+        		nextId++;
+        	}
+        }
+      }
+      
+      player = player+'></embed>';
+      
+      $('#content>div').append(player);
       
       removeProgress();
       scrollTo(0,1);
@@ -106,7 +121,7 @@ function populateCategories(list) {
     var categories = list.categories;
     var categoryList = $("#categories");
     for(var idx in categories) {
-        categoryList.append('<li><a href="#" onclick="javascript:loadCategory(\''+categories[idx]+'\')">'+categories[idx]+'</a></li>');
+        categoryList.append('<li class="linkItem" onclick="javascript:loadCategory(\''+categories[idx]+'\')">'+categories[idx]+'</li>');
     }
 }
 
@@ -140,11 +155,11 @@ function displayBookResults(list) {
 
 function createBookListItem(book) {
     var bookTitle = book.feedUrl.substring(book.feedUrl.lastIndexOf('/title/')+7, book.feedUrl.lastIndexOf('/feed'));
-    var listItem = '<li><a href="#" onclick="javascript:loadBookDetail(\''+bookTitle+'\')">'+book.title;
+    var listItem = '<li class="linkItem" onclick="javascript:loadBookDetail(\''+bookTitle+'\')">'+book.title;
     if(book.lastUpdated != undefined) {
         listItem = listItem + '<br/><span class="updateDate">Updated On: '+book.lastUpdated+'</span>';
     }
-    listItem = listItem + '</a></li>';
+    listItem = listItem + '</li>';
     return listItem;    
 }
 
@@ -203,10 +218,27 @@ function replaceBookData(book, title) {
     book.description = book.description.replace(/\r?\n|\r|\\n/g, '<br/>');
     $('#description').empty().append(book.description);
     
-    var episodes = $("#episodes");
-    for(var idx in book.episodes) {
-        episodes.append('<li><a href="#" onclick="javascript:loadPlayer(\''+book.episodes[idx].url+'\');">'+book.episodes[idx].title+'</a></li>');
+    var episodesList = $("#episodes");
+    episodes = book.episodes
+    for(var idx in episodes) {
+    	var content = '<li id="episode'+idx+'"class="linkItem" onclick="javascript:expandEpisode('+idx+');">';
+    	content = content+episodes[idx].title+'</li>';
+    	episodesList.append(content);
     }
+}
+
+function expandEpisode(idx) {
+	var episodeItem = $("#episode"+idx);
+	$("li.linkItem a").remove();
+	$("li.linkItem br").remove();	
+	
+	if($("#episode"+idx+" a").length == 0) {
+	  episodeItem.append('<br/><br/><a class="playEpisode" href="#" onclick="javascript:loadPlayer('+idx+');">Play Single Episode</a>');
+	  episodeItem.append('<br/><br/><a class="playEpisode" href="#" onclick="javascript:loadPlayer('+idx+', true);">Play Book from this Episode</a>');
+	} else {
+		$("#episode"+idx+" a").remove();
+		$("#episode"+idx+" br").remove();
+	}
 }
 
 function loadSearch() {
