@@ -49,6 +49,7 @@ function handlePageChange(historyFunction, title) {
 }
 
 function loadPlayer(epIdx, playAll) {
+	showProgress();
 	$('body').load('play.html #container', function() {
       $('#backbutton').remove();
       hist.unshift(new History('Play Episode', function(){loadPlayer(url);}));
