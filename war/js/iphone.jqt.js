@@ -206,7 +206,7 @@ function isPlayed(idx) {
 function confirmPlay(idx) {
     displayConfirmation('#detail', 'Play this episode?',
         function(){
-            playPause(parseInt(idx));
+            playPause(idx);
         }
     );
 }
@@ -236,24 +236,15 @@ function checkPosition(idx) {
     episodes[idx].duration = duration;
     episodes[idx].position = position;
     
-    //remove me!
-    var debug = duration+' : '+position;
-    if($('#debug').length == 0) {
-    	$('#episodes').before('<p id="debug">'+debug+'</p>');
-    } else {
-    	$('#debug').html(debug);
-    }
-    
     var isTest = true;
     if(duration != 0 && duration != undefined) {
         //If within a second.
         if(duration < position+1) {
-        	$('#debug').html(debug+' Within a second.');
             window.clearInterval(checkInterval);
             showNextEpisodeConfirm('#detail');
             updatePosition(idx, true);
+            audio.remove();
         } else {
-        	$('#debug').html(debug+' Not within a second.');
         	updatePosition(idx);
         }
     }
