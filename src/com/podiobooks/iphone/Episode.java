@@ -7,6 +7,7 @@ public class Episode {
     private String title;
     private String description;
     private String publicationDate;
-    private String duration;
+    private int duration = 0;
+    private int position = 0;
     private String url;
 }

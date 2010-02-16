@@ -1,0 +1,9 @@
+<jso>
+    <group name="application">
+        <js>iphone.jqt.js</js>
+    </group> 
+
+    <group name="all">
+        <group-ref>application</group-ref>
+    </group>
+</jso>
