@@ -191,16 +191,24 @@ function populateBookData(book, title) {
         $("#hiddenPlayer").append('<audio id="audio'+idx+'" src="'+episodes[idx].url+'" height="0" width="0"></audio>');
         
         $('#'+idx).bind('tap', function() {
-            playPause($(this).attr('id'));
+            confirmPlay($(this).attr('id'));
         });
         $('#'+idx).bind('click', function() {
-            playPause($(this).attr('id'));
+            confirmPlay($(this).attr('id'));
         });
     }
 }
 
 function isPlayed(idx) {
     return false;
+}
+
+function confirmPlay(idx) {
+    displayConfirmation('#detail', 'Play this episode?',
+        function(){
+            playPause(parseInt(idx));
+        }
+    );
 }
 
 function playPause(idx) {

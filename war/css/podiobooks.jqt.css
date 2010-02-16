@@ -70,6 +70,10 @@ ul li, ul li a {
 	margin: 15px 0px 17px 0px;	
 }
 
+.complete {
+    background-color: rgb(220,220,220);
+}
+
 #progress {
     -webkit-border-radius: 10px;
     background-color: rgba(0,0,0,.7);
@@ -91,16 +95,16 @@ ul li, ul li a {
     -webkit-border-radius: 10px;
     background-color: rgba(0,0,50,.7);
     color: white;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: bold;
-    height: 80px;
+    height: 110px;
     line-height: 40px;
-    left: 60px;
+    left: 10px;
     margin: 0 auto;
     position: absolute;
     text-align: center;
     top: 120px;
-    width: 200px;
+    width: 300px;
     z-index: 200;
 }
 
@@ -108,11 +112,12 @@ ul li, ul li a {
     -webkit-border-radius: 6px;
     background-color: rgba(0,0,75,.9);
     color: white;
-    line-height: 2em;
-    font-size: 14px;
+    line-height: 3em;
+    vertical-align: middle;
+    font-size: 18px;
     font-weight: bold;
-    height: 30px;
-    width: 60px;
+    height: 50px;
+    width: 100px;
     z-index: 201;
 }
 
