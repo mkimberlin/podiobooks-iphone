@@ -1,13 +1,12 @@
 body {
-    background-color: #ddd;
-    color: #222;
-    font-family: Helvetica;
-    font-size: 14px;
-    margin: 0;
-    padding: 0;
+	font-family: "Helvetica Neue", Helvetica;
 }
 
-#logo {
+#jqt ul li, #jqt ul li a {
+	color: #222;	
+}
+
+.logo {
 	display: block;
     position:absolute;
     z-index:2;
@@ -32,7 +31,7 @@ body {
     padding: 12px 10px;
     margin: 0px 0px 0px 108px;
     text-align: center;
-    height: 120px;
+    height: 144px;
     width: 197px;
     vertical-align: middle;
     display: table-cell;
@@ -50,68 +49,7 @@ body {
     text-shadow: 0px 2px 0px #fff;
 }
 
-#header {
-	display: block;
-    background-color: #ccc;
-    background-image: -webkit-gradient(linear, left top, left bottom, from(#ccc), to(#999));
-    border-color: #666;
-    border-style: solid;
-    border-width: 0 0 1px 0;
-    position:absolute;
-    width: 100%;
-    top:0;
-    left:0;
-    z-index:2;
-}
-
-#header h1 {
-    color: #222;
-    font-size: 18px;
-    font-weight: bold;
-    margin: 0 1px;
-    padding: 12px 65px 12px 65px;
-    text-align: center;
-    text-shadow: 0px 1px 0px #fff;
-}
-
-ul {
-    list-style: none;
-    padding: 0;
-    margin-top: 0px;
-}
-
-ul li.linkItem {
-    background-color: #FFF;
-    border: 1px solid #999;
-    color: #222;
-    display: block;
-    font-size: 16px;
-    font-weight: bold;
-    margin-bottom: -1px;
-    padding: 12px 10px;
-    text-decoration: none;
-}
-
-ul li.linkItem a {
-	color: #222;
-    text-decoration: none;	
-}
-
-ul li:first-child.linkItem {
-    -webkit-border-top-left-radius: 8px;
-    -webkit-border-top-right-radius: 8px;
-}
-
-ul li:last-child.linkItem {
-    -webkit-border-bottom-left-radius: 8px;
-    -webkit-border-bottom-right-radius: 8px;
-}
-
-ul li.linkItem a:active {
-    color: #222;
-}
-
-.updateDate {
+.updateDate, .currentPosition {
 	font-size: 12px;
 }
 
@@ -119,24 +57,33 @@ ul li.linkItem a:active {
 	font-size: 14px;
 }
 
-#wrapper {
-	position:relative;	/* needed */
-	z-index:1;			/* needed and important */
-	width:320px;
-	height:465px;		/* needed */
+.episode {
+    background: url('../images/chevron_circle.png');
+    background-position: center right;
+    background-repeat: no-repeat;
 }
 
-#content {
-    padding: 0 10px;
-    text-shadow: 0px 1px 0px #fff;
-    margin: 55px 0 0 0;
-    float:left;
-	width:300px;
+.toolbar {
+    z-index: 2;	
 }
 
-#progress {
+
+#bookDetail, #embed {
+	padding: 10px 10px 10px 10px;
+}
+
+#bookDetail ul {
+	margin: 15px 0px 17px 0px;	
+}
+
+.complete {
+    background-color: rgb(220,220,220);
+}
+
+.progress {
     -webkit-border-radius: 10px;
-    background-color: rgba(0,0,0,.7);
+    background: null;
+    background-color: rgba(0,0,50,.7);
     color: white;
     font-size: 18px;
     font-weight: bold;
@@ -151,25 +98,63 @@ ul li.linkItem a:active {
     z-index: 200;
 }
 
-#backButton {
-	z-index: 3;
-    font-weight: bold;
-    text-align: center;
-    line-height: 28px;
+.confirm {
+    -webkit-border-radius: 10px;
+    background: null;
+    background-color: rgba(0,0,50,.7);
     color: white;
-    text-shadow: rgba(0,0,0,0.6) 0px -1px 0px;
+    font-size: 18px;
+    font-weight: bold;
+    height: 110px;
+    line-height: 50px;
+    left: 25px;
+    margin: 0 auto;
     position: absolute;
-    top: 9px;
-    left: 10px;
-    max-width: 40px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    border-width: 0 8px 0 14px;
-    -webkit-border-image: url(../images/back.png) 0 8 0 14;
-    -webkit-tap-highlight-color: rgba(0,0,0,0);
+    text-align: center;
+    top: 120px;
+    width: 270px;
+    z-index: 200;
+}
+
+.confirm .yes, .confirm .no {
+    -webkit-border-radius: 6px;
+    background-color: rgba(0,0,75,.9);
+    color: white;
+    line-height: 3em;
+    vertical-align: middle;
+    font-size: 18px;
+    font-weight: bold;
+    height: 50px;
+    width: 100px;
+    z-index: 201;
+}
+
+.confirm .yes {
+    float: left;
+    margin-left: 25px;
+}
+
+.confirm .no {
+    float: right;
+    margin-right: 25px;
 }
 
 #search {
 	font-size: 18px;
+}
+
+.vertical-scroll {
+	height: 415px;
+}
+
+.landscape .vertical-scroll {
+	height: 250px;
+}
+
+.vertical-scroll.search {
+	height: 390px;
+}
+
+.landscape .vertical-scroll.search {
+	height: 225px;
 }

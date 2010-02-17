@@ -1,152 +1,122 @@
-var hist = [];
-var start = new History('Home', function() {loadPage('index.html');});
 var episodes;
+var checkInterval;
+var current;
 
-function loadPage(url) {
-    showProgress();
-    scrollTo(0,1);
-    if (url == undefined || url == 'index.html') {
-        if(url != undefined) {
-            $('body').load(url + ' #container', function(){handlePageChange(function() {loadPage('index.html');}, 'Home');});
-        } else {
-        	handlePageChange(function() {loadPage('index.html');}, 'Home');
-        }
-    } else {
-        $('body').load(url + ' #container', function() {
-            handlePageChange(function() {loadPage(url);});
-        });
+function showProgress(target) {
+    var progress = $('div.progress');
+    var page = $('body'); 
+    if(target != undefined) {
+        page = $(target);
+    }
+    if(progress.length == 0) {
+        page.append('<div class="progress">Loading...</div>');
     }
 }
 
-function handleStartPage() {
-    hijackLinks();
-    hist.unshift(start);
-    removeProgress();
+function showNextEpisodeConfirm(target) {
+	$("#hiddenPlayer").empty();
+	$("#hiddenPlayer").append('<audio src="'+episodes[current+1].url+'" height="0" width="0"></audio>');
+	current = current+1;
+    displayConfirmation(target, 'Play the next episode?',
+        function(){
+    	    playPause();
+    	}
+    );
 }
 
-function History(title, method) {
-    this.title = title;
-    this.method = method;
-}
-
-function handlePageChange(historyFunction, title) {
-    $('#backbutton').remove();
-    if(title == undefined || title == null) {
-        title = $('#header h1').html();
-    } else {
-        var headerText = $('#header h1');
-        headerText.text(title);
+function displayConfirmation(target, text, yesFunc, noFunc) {
+	var confirm = $(target+' .confirm');
+    var page = $('body');
+    if(target != undefined) {
+        page = $(target);
     }
-	setTimeout( function() {
-		document.addEventListener('touchmove', function(e){ e.preventDefault(); }, false);
-		myScroll = new iScroll(document.getElementById('content'));
-	}, 100);
-    hist.unshift(new History(title, historyFunction));
-    addBackButton();
-    removeProgress();
-    hijackLinks();
-    scrollTo(0,1);
-}
-
-function loadPlayer(epIdx, playAll) {
-	showProgress();
-	$('body').load('play.html #container', function() {
-      $('#backbutton').remove();
-      hist.unshift(new History('Play Episode', function(){loadPlayer(url);}));
-      addBackButton();
-      
-      var player = '<embed height="100px" width="100px" target="myself" type="audio/mpeg" loop="false" href="'+episodes[epIdx].url+'" ';
-      
-      var nextId = 1;
-      if(playAll != undefined) {
-        for(var idx in episodes) {
-        	if(idx > epIdx) {
-        		player = player + 'qtnext'+nextId+'="<'+episodes[idx].url+'> T<myself>" ';
-        		nextId++;
-        	}
-        }
-      }
-      
-      player = player+'></embed>';
-      
-      $('#content>div').append(player);
-      
-      removeProgress();
-      scrollTo(0,1);
-	});
-}
-
-function addBackButton(){
-    if(hist.length > 1) {
-        $('#header').prepend('<span id="backButton">'+hist[1].title+'</span>');
-        $('#backButton').click(function(){
-            //Remove current page
-            hist.shift();
-            var history = hist.shift();
-            history.method();
-        });
+    if(confirm.length == 0) {
+        page.append('<div class="confirm"></div>');
+        confirm = $(target+' .confirm');
+        confirm.append(text);
+        confirm.append('<br/><div class="yes">Yes</div><div class="no">No</div>');
+        
+        var callAndClose =  function(func) {
+        	if(func != undefined) func();
+        	$(target+' .confirm').remove();
+        };
+        var yesCall = function() {callAndClose(yesFunc);};
+        var noCall = function() {callAndClose(noFunc);};
+        
+        var yes = $(target+' .confirm .yes');
+        yes.bind('tap', yesCall);
+        yes.bind('click', yesCall);
+        
+        var no = $(target+' .confirm .no');
+        no.bind('tap', noCall);
+        no.bind('click', noCall);
     }
-}
-
-function showProgress() {
-    $('body').append('<div id="progress">Loading...</div>');
 }
 
 function removeProgress() {
-    var progress = $('#progress');
+    var progress = $('div.progress');
     if(progress != undefined) {
         progress.remove();
     }
 }
 
-function hijackLinks() {
-    var staticLinks = $('#content a.static');
-    staticLinks.click(function(e){
-        e.preventDefault();
-        loadPage(e.target.href);
-    });
-}
-
 function loadCategories() {
-    showProgress();
+    showProgress('#categorypage');
     $.getJSON('resources/category/list',
         function(categoryList) {
-            $('body').load('categories.html #container', function() {
-            	populateCategories(categoryList);
-            	handlePageChange(function() {loadCategories();});
-            });
+            populateCategories(categoryList);
+            removeProgress();
         });
 }
 
 function populateCategories(list) {
     var categories = list.categories;
-    var categoryList = $("#categories");
-    for(var idx in categories) {
-        categoryList.append('<li class="linkItem" onclick="javascript:loadCategory(\''+categories[idx]+'\')">'+categories[idx]+'</li>');
+    var categoryList = $('#categoryScroll');
+    categoryList.empty();
+    if(categories == undefined || categories == null) {
+    	categoryList.append('<p style="text-align:center">No Categories Found!</p>');
+    } else {
+    	categoryList.append('<ul class="rounded"></ul>');
+    	categoryList = $('#categoryScroll ul');
+        for(var idx in categories) {
+            categoryList.append('<li><a id="cat'+idx+'" href="#books">'+categories[idx]+'</a></li>');
+            $('#cat'+idx).bind('tap', function(){loadCategory($(this).text());});
+            $('#cat'+idx).bind('click', function(){loadCategory($(this).text());});
+        }
     }
 }
 
 function loadCategory(category) {
-    showProgress();
-    $.getJSON('resources/books/category/'+category.replace(/\//g,"-_-"),
+    showProgress('#books');
+    $.getJSON('resources/books/category/'+category.replace(/\//g,'-_-'),
         function(bookList) {
-            $('body').load('books.html #container', function() {
-            	displayBookResults(bookList);
-            	handlePageChange(function() {loadCategory(category);}, category);
-            });
+            displayBookResults(bookList);
+            removeProgress();
         });
 }
 
-function displayBookResults(list) {
+function displayBookResults(list, target) {
+	if(target == undefined) {
+		target = '#bookScroll';
+	}
+	
+    $(target).empty();
     if(list == undefined || list == null || list.books == undefined || list.books == null) {
-        $("#books").prepend('<p id="noneFound" style="text-align:center">No Books Found</p>');
+        $(target).append('<p style="text-align:center">No Books Found</p>');
     } else {
+        $(target).append('<ul class="rounded"></ul>');
+        var bookList = $(target+' ul');
         var books = list.books;
-        $('nonFound').remove();
-        var bookList = $("#books");
         if(books instanceof Array) {
             for(var idx in books) {
-                bookList.append(createBookListItem(books[idx]));
+                var bookTitle = books[idx].feedUrl.substring(books[idx].feedUrl.lastIndexOf('/title/')+7, books[idx].feedUrl.lastIndexOf('/feed'));
+                bookList.append(createBookListItem(books[idx], bookTitle));
+                $('#'+bookTitle).bind('tap', function() {
+                    loadBookDetail($(this).attr('id'));
+                });
+                $('#'+bookTitle).bind('click', function() {
+                    loadBookDetail($(this).attr('id'));
+                });
             }
         } else {
             bookList.append(createBookListItem(books));
@@ -154,45 +124,47 @@ function displayBookResults(list) {
     }
 }
 
-function createBookListItem(book) {
-    var bookTitle = book.feedUrl.substring(book.feedUrl.lastIndexOf('/title/')+7, book.feedUrl.lastIndexOf('/feed'));
-    var listItem = '<li class="linkItem" onclick="javascript:loadBookDetail(\''+bookTitle+'\')">'+book.title;
+function createBookListItem(book, id) {
+    var listItem = '<li><a id="'+id+'" class="slideup" href="#detail">'+book.title;
     if(book.lastUpdated != undefined) {
-        listItem = listItem + '<br/><span class="updateDate">Updated On: '+book.lastUpdated+'</span>';
+        listItem += '<br/><span class="updateDate">Updated On: '+book.lastUpdated+'</span>';
     }
-    listItem = listItem + '</li>';
+    listItem += '</a></li>';
     return listItem;    
 }
 
+function loadAnyRandom() {
+	loadRandom();
+}
+
 function loadRandom(category) {
-    showProgress();
+    showProgress('#detail');
     var resource = 'resources/books/random';
     if(category != undefined) {
-        resource = resource+"/"+category;
+        resource += '/'+category;
     }
     $.getJSON(resource,
         function(book){
-            $('body').load('detail.html #container',
-                function() {
-                    var title = book.feedUrl.substring(book.feedUrl.lastIndexOf('/title/')+7, book.feedUrl.lastIndexOf('/feed'));
-                    replaceBookData(book, title);
-                    handlePageChange(function() {loadBookDetail(title);});
-                });
-        });
-}
-
-function loadBookDetail(title) {
-    showProgress();
-    $.getJSON('resources/books/title/'+title,
-        function(book){
-            $('body').load('detail.html #container', function() {
-            	replaceBookData(book, title);
-            	handlePageChange(function() {loadBookDetail(title);});
+            var title = book.feedUrl.substring(book.feedUrl.lastIndexOf('/title/')+7, book.feedUrl.lastIndexOf('/feed'));
+            $('#bookDetail').load('bookDetail.html', function(){
+                populateBookData(book, title);
+                removeProgress();
             });
         });
 }
 
-function replaceBookData(book, title) {
+function loadBookDetail(title) {
+    showProgress('#detail');
+    $('#bookDetail').empty();
+    $.getJSON('resources/books/title/'+title, function(book) {
+            $('#bookDetail').load('bookDetail.html', function(){
+                  populateBookData(book, title);
+                  removeProgress();
+            });
+        });
+}
+
+function populateBookData(book, title) {
     var bookTitle = $('#bookTitle');
     bookTitle.text(book.title);
     
@@ -200,14 +172,14 @@ function replaceBookData(book, title) {
     if(book.authors instanceof Array) {
        for(var idx in book.authors) {
            if(idx > 0 && idx == book.authors.length-1) {
-               authorText = authorText + " and ";
+               authorText += ' and ';
            } else if(idx > 0){
-               authorText = authorText + ", "
+               authorText += ', '
            }
-           authorText = authorText + book.authors[idx];
+           authorText += book.authors[idx];
        }
     } else {
-        authorText = authorText + book.authors;
+        authorText += book.authors;
     }
     var author = $('.title>.author');
     author.text(authorText);
@@ -219,139 +191,195 @@ function replaceBookData(book, title) {
     book.description = book.description.replace(/\r?\n|\r|\\n/g, '<br/>');
     $('#description').empty().append(book.description);
     
-    var episodesList = $("#episodes");
+    var episodesList = $('#episodes');
     episodes = book.episodes
     for(var idx in episodes) {
-    	var content = '<li id="episode'+idx+'"class="linkItem" onclick="javascript:expandEpisode('+idx+');">';
-    	content = content+episodes[idx].title+'</li>';
-    	episodesList.append(content);
-    }
-}
-
-function expandEpisode(idx) {
-	var episodeItem = $("#episode"+idx);
-	$("li.linkItem a").remove();
-	$("li.linkItem br").remove();	
-	
-	if($("#episode"+idx+" a").length == 0) {
-	  episodeItem.append('<br/><br/><a class="playEpisode" href="#" onclick="javascript:loadPlayer('+idx+');">Play Single Episode</a>');
-	  episodeItem.append('<br/><br/><a class="playEpisode" href="#" onclick="javascript:loadPlayer('+idx+', true);">Play Book from this Episode</a>');
-	} else {
-		$("#episode"+idx+" a").remove();
-		$("#episode"+idx+" br").remove();
-	}
-}
-
-function loadSearch() {
-    $('body').load('search.html #container', function() {
-        var searchForm = $('#searchForm');
-        searchForm.submit(function(event){    
-            search(); 
-            event.preventDefault();
-            return false;
+        var content = '<li id="'+idx+'" class="episode';
+        if(isPlayed(episodes[idx]) == true) {
+            content +=' played';
+        }
+        content += '">'+episodes[idx].title;
+        
+        if(episodes[idx].position != 0) {
+            content += '<br/><span class="currentPosition"> Current Position: ';
+            content += getCurrentPosition(idx);
+            content += '</span>';
+        }
+        
+        content += '</li>';
+        episodesList.append(content);
+        
+        $('#'+idx).bind('tap', function() {
+            confirmPlay($(this).attr('id'));
         });
-        handlePageChange(function() {loadPage('search.html');}, "Search");
-    });
+        $('#'+idx).bind('click', function() {
+            confirmPlay($(this).attr('id'));
+        });
+    }
 }
 
-function search(query) {
-    showProgress();
-    var keywords;
-    if(query == undefined) {
-        keywords = $('#search').attr('value');
+function isPlayed(idx) {
+    return false;
+}
+
+function confirmPlay(idx) {
+	if(current != parseInt(idx)) {
+        $("#hiddenPlayer").empty();
+        $("#hiddenPlayer").append('<audio src="'+episodes[parseInt(idx)].url+'" height="0" width="0"></audio>');
+	}
+    current = parseInt(idx);
+    displayConfirmation('#detail', 'Play this episode?',
+        function(){
+            playPause();
+        }
+    );
+}
+
+function playPause() {
+    var audio = $('#hiddenplayer audio')[0];
+    if (audio.paused) {
+      audio.play();
+      if(checkInterval != undefined)
+          window.clearInterval(checkInterval);
+      checkInterval = window.setInterval("checkPosition()", 1000);
     } else {
-        keywords = query;
+      audio.pause();
     }
+}
+
+function checkPosition() {
+    var audio = $('#hiddenplayer audio');
+    if(audio[0].paused) {
+        window.clearInterval(checkInterval);
+    }
+    
+    var duration = audio.attr('duration');
+    var position = audio.attr('currentTime');
+    var episode = episodes[current];
+    episodes[current].duration = duration;
+    episodes[current].position = position;
+    
+    var isTest = true;
+    if(duration != 0 && duration != undefined) {
+        //If within a second.
+        if(duration < position+1) {
+        	//The order of these calls is important.
+            audio.remove();
+            window.clearInterval(checkInterval);
+            updatePosition(current, true);
+            showNextEpisodeConfirm('#detail');
+        } else {
+        	updatePosition(current);
+        }
+    }
+}
+
+function updatePosition(idx, complete) {
+    var episodeItem = $('#'+idx);
+    var positionItem = $('#'+idx+' .currentPosition');
+    var content;
+    if(complete == true) {
+    	episodeItem.addClass('complete');
+    	content = ' Complete!';
+    } else {
+    	content = ' Current Position: ';
+        content += getCurrentPosition(idx);
+    }
+    if(positionItem.length == 0) {
+        content = '<br/><span class="currentPosition">' + content;
+        content += '</span>';
+        episodeItem.append(content);
+    } else {
+        positionItem.html(content);
+    }
+}
+
+function getCurrentPosition(idx) {
+    var lastTime = episodes[idx].position;
+    var seconds = (lastTime%60).toFixed(0);
+    if(seconds < 10) {
+        seconds = "0"+seconds;
+    }
+    return (Math.floor(lastTime/60)).toFixed(0)+':'+seconds;    
+}
+
+function getDuration() {
+    var audio = $('#hiddenplayer audio');
+    return audio.attr('duration');
+}
+
+function search() {
+    showProgress('#searchpage');
+    var keywords = $('#search').attr('value');
     $.getJSON('resources/books/search', {keyword:keywords}, 
         function(results) {
-            $('body').load('search.html #container', function() {
-            	populateSearchResults(keywords, results);
-            	handlePageChange(function() {search(keywords);}, 'Search');
-            });
+    	    displayBookResults(results, '#results');
+            removeProgress();
         });
-}
-
-function populateSearchResults(keywords, result) {
-    var searchForm = $('#searchForm');
-    searchForm.submit(function(event){    
-        search(); 
-        event.preventDefault();
-        return false;
-    });
-    
-    //Avoid making multiple searches new history entries...
-    var last = hist.shift();
-    if(last.title != 'Search') {
-        hist.unshift(last);
-    }
-
-    $('#search').attr('value', keywords);
-    
-    displayBookResults(result);
 }
 
 function loadRecent() {
-    showProgress();
+    showProgress('#books');
+    $('#bookScroll').empty();
+    $('#books .toolbar h1').text('Recent Updates');
     $.getJSON('resources/books/recent',
         function(updates) {
-            $('body').load('books.html #container', function() {
-                displayBookResults(updates);
-                handlePageChange(loadRecent, 'Recent Updates');
-            });
+            displayBookResults(updates);
+            removeProgress();
         });
 }
 
 function loadTopTen() {
-    showProgress();
+    showProgress('#books');
+    $('#bookScroll').empty();
+    $('#books .toolbar h1').text('Top Ten');
     $.getJSON('resources/stats/top',
         function(updates) {
-            $('body').load('books.html #container', function() {
-                displayBookResults(updates);
-                handlePageChange(loadTopTen, 'Top Ten');
-            });
+            displayBookResults(updates);
+            removeProgress();
         });
 }
 
 function loadTodaysTop() {
-    showProgress();
+    showProgress('#books');
+    $('#bookScroll').empty();
+    $('#books .toolbar h1').text('Today\'s Top');
     $.getJSON('resources/stats/today',
         function(updates) {
-            $('body').load('books.html #container', function() {
-                displayBookResults(updates);
-                handlePageChange(loadTodaysTop, 'Today\'s Top');
-            });
+            displayBookResults(updates);
+            removeProgress();
         });
 }
 
 function loadTopOverall() {
-    showProgress();
+    showProgress('#books');
+    $('#bookScroll').empty();
+    $('#books .toolbar h1').text('Top Rated');
     $.getJSON('resources/stats/overall',
         function(updates) {
-            $('body').load('books.html #container', function() {
-                displayBookResults(updates);
-                handlePageChange(loadTopOverall, 'Top Rated');
-            });
+            displayBookResults(updates);
+            removeProgress();
         });
 }
 
 function loadTopByVotes() {
-    showProgress();
+    showProgress('#books');
+    $('#bookScroll').empty();
+    $('#books .toolbar h1').text('Top By Votes');
     $.getJSON('resources/stats/topbyvotes',
         function(updates) {
-            $('body').load('books.html #container', function() {
-                displayBookResults(updates);
-                handlePageChange(loadTopByVotes, 'Top By Votes');
-            });
+            displayBookResults(updates);
+            removeProgress();
         });
 }
 
 function loadTopAllTime() {
-    showProgress();
+    showProgress('#books');
+    $('#bookScroll').empty();
+    $('#books .toolbar h1').text('All Time Top');
     $.getJSON('resources/stats/alltime',
         function(updates) {
-            $('body').load('books.html #container', function() {
-                displayBookResults(updates);
-                handlePageChange(loadTopAllTime, 'All Time Top');
-            });
+            displayBookResults(updates);
+            removeProgress();
         });
 }

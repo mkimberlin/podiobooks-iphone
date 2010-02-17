@@ -1,41 +1,147 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
-  "http://www.w3.org/TR/html4/strict.dtd">
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <meta name="viewport" content="user-scalable=no, width=device-width" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <link rel="stylesheet" type="text/css" href="css/iphone.css" />
-    <link rel="apple-touch-startup-image" href="images/startup.png" />
+    <style type="text/css" media="screen">@import "css/jqtouch.css";</style>
+    <style type="text/css" media="screen">@import "themes/apple/theme.css";</style>
+    <style type="text/css" media="screen">@import "css/scrolling.css";</style>
+    <style type="text/css" media="screen">@import "css/podiobooks.css";</style>
     <script type="text/javascript" src="js/jquery.js"></script>
-    <script type="text/javascript" src="js/iscroll.js"></script>
-    <script type="text/javascript" src="js/podiobooks.js"></script>
-    <script type="text/javascript">
-    	$(document).ready(function(){ 
-        	loadPage();
-    	});
+    <script type="text/javascript" src="js/iphone.js"></script>
+    <script type="text/javascript" src="js/jqtouch.js"></script> 
+    <script type="text/javascript" src="js/extensions/jqt.scrolling.js"></script>
+    <script type="text/javascript"> 
+      var jQT = new $.jQTouch({
+          icon: 'apple-touch-icon.png',
+          startupScreen: 'images/startup.png',
+          statusBar: 'black',
+          slideSelector: '#jqt li a',
+          preloadImages: [
+              'images/logo.png',
+              'themes/apple/img/backButton.png',
+              'images/cover.png',
+              'images/chevron_circle.png'
+              ]
+      });
+      $(document).ready(function(e) {
+        //Eventually, these groups should be changed to something like this:
+        //    $('#topten').tap(loadTopTen);
+        $('#topten').bind('tap', loadTopTen);
+        $('#topten').bind('click', loadTopTen);
+
+        $('#today').bind('tap', loadTodaysTop);
+        $('#today').bind('click', loadTodaysTop);
+
+        $('#overall').bind('tap', loadTopOverall);
+        $('#overall').bind('click', loadTopOverall);
+
+        $('#votes').bind('tap', loadTopByVotes);
+        $('#votes').bind('click', loadTopByVotes);
+
+        $('#alltime').bind('tap', loadTopAllTime);
+        $('#alltime').bind('click', loadTopAllTime);
+
+        $('#recent').bind('tap', loadRecent);
+        $('#recent').bind('click', loadRecent);
+
+        $('#categories').bind('tap', loadCategories);
+        $('#categories').bind('click', loadCategories);
+
+        $('#random').bind('tap', loadAnyRandom);
+        $('#random').bind('click', loadAnyRandom);
+        
+        $('#searchForm').submit(function(event){    
+            search(); 
+            event.preventDefault();
+            return false;
+        });
+      });
     </script>
     <title>Podiobooks.com</title>
   </head>
 
   <body>
-    <div id="container">
-    <div id="header">
-      <h1 style="">Podiobooks.com</h1>
-    </div>
-    <div id="logo"><img src="images/logo.png" height="44" width="60"></div>
-    <div id="wrapper">
-    <div id="content">
-      <ul>
-        <li class="linkItem" onclick="javascript:loadPage('hot.html');">What's Hot</li>
-        <li class="linkItem" onclick="javascript:loadRecent();">Recent Updates</li>
-        <li class="linkItem" onclick="javascript:loadCategories();">Browse Categories</li>
-        <li class="linkItem" onclick="javascript:loadRandom();">Find Random Title</li>
-        <li class="linkItem" onclick="javascript:loadSearch();">Search for Books</li> 
-        <!-- <li class="linkItem" onclick="javascript:loadNews();">Podiobooks News</li> -->
-      </ul>
-    </div>
-    </div>
+    <div id="jqt">
+      <div id="home">
+        <div class="toolbar">
+          <h1>Podiobooks.com</h1>
+        </div>
+        <div class="logo"><img src="images/logo.png" height="44" width="60"></div>
+        <ul class="rounded">
+          <li><a href="#hot">What's Hot</a></li>
+          <li><a id="recent" href="#books">Recent Updates</a></li>
+          <li><a id="categories" href="#categorypage">Browse Categories</a></li>
+          <li><a id="random" href="#detail">Find Random Title</a></li>
+          <li><a id="searchlink" href="#searchpage">Search for Books</a></li>
+        </ul>
+      </div>
+      
+      <div id="hot">
+        <div class="toolbar">
+          <a href="#" class="back">Back</a>
+          <h1>What's Hot</h1>
+        </div>
+        <div class="logo"><img src="images/logo.png" height="44" width="60"></div>
+        <ul class="rounded">
+          <li><a id="topten" href="#books">Top Ten</a></li>
+          <li><a id="today" href="#books">Today's Top Subscriptions</a></li>
+          <li><a id="overall" href="#books">Top Rated</a></li>
+          <li><a id="votes" href="#books">Top Rated By Votes</a></li>
+          <li><a id="alltime" href="#books">All Time Top Subscriptions</a></li>
+        </ul>
+      </div>
+      
+      <div id="categorypage">
+        <div class="toolbar">
+          <a href="#" class="back">Back</a>
+          <h1>Categories</h1>
+        </div>
+        <div class="logo"><img src="images/logo.png" height="44" width="60"></div>
+        <div class="vertical-scroll">
+        <div id="categoryScroll">
+        </div>
+        </div>
+      </div>
+      
+      <div id="books">
+        <div class="toolbar">
+          <a href="#" class="back">Back</a>
+          <h1>Books</h1>
+        </div>
+        <div class="logo"><img src="images/logo.png" height="44" width="60"></div>
+        <div class="vertical-scroll">
+        <div id="bookScroll">
+        </div>
+        </div>
+      </div>
+      
+      <div id="searchpage">
+        <div class="toolbar">
+          <a href="#" class="back">Back</a>
+          <h1>Search</h1>
+        </div>
+        <div class="logo"><img src="images/logo.png" height="44" width="60"></div>
+        <div align="center">
+          <form id="searchForm">
+          <input id="search" type="search" name="keyword" results="5"/>
+          </form>
+        </div>
+        <div class="vertical-scroll search">
+        <div id="results">
+        </div>
+        </div>
+      </div>
+      
+      <div id="detail">
+        <div class="toolbar">
+          <a href="#" class="back">Back</a>
+          <h1>Book Detail</h1>
+        </div>
+        <div class="logo"><img src="images/logo.png" height="44" width="60"></div>
+        <div class="vertical-scroll">
+        <div id="bookDetail">
+        </div>
+        </div>
+      </div>
     </div>
   </body>
 </html>
