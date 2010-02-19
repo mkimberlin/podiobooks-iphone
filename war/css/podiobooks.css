@@ -83,7 +83,7 @@ body {
 .progress {
     -webkit-border-radius: 10px;
     background: null;
-    background-color: rgba(0,0,50,.7);
+    background-color: rgba(67,81,100,.8);
     color: white;
     font-size: 18px;
     font-weight: bold;
@@ -101,7 +101,7 @@ body {
 .confirm {
     -webkit-border-radius: 10px;
     background: null;
-    background-color: rgba(0,0,50,.7);
+    background-color: rgba(67,81,100,.8);
     color: white;
     font-size: 18px;
     font-weight: bold;
@@ -118,7 +118,7 @@ body {
 
 .confirm .yes, .confirm .no {
     -webkit-border-radius: 6px;
-    background-color: rgba(0,0,75,.9);
+    background-color: rgba(67,81,100,.9);
     color: white;
     line-height: 3em;
     vertical-align: middle;
@@ -141,6 +141,7 @@ body {
 
 #search {
 	font-size: 18px;
+	margin-top: 10px;
 }
 
 .vertical-scroll {
@@ -152,9 +153,9 @@ body {
 }
 
 .vertical-scroll.search {
-	height: 390px;
+	height: 385px;
 }
 
 .landscape .vertical-scroll.search {
-	height: 225px;
+	height: 220px;
 }

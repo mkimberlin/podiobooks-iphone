@@ -9,5 +9,6 @@ public class Episode {
     private String publicationDate;
     private int duration = 0;
     private int position = 0;
+    private boolean complete = false;
     private String url;
 }
