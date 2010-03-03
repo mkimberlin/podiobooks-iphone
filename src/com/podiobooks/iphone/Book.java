@@ -19,4 +19,5 @@ public class Book {
 	private String imageUrl;
 	private String feedUrl;
 	private List<Episode> episodes;
+	private String error;
 }

@@ -10,4 +10,5 @@ import lombok.Data;
 @XmlRootElement(name="categoryList")
 public class CategoryList {
     private List<String> categories;
+    private String error;
 }

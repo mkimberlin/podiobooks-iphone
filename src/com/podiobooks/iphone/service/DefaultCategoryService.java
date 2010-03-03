@@ -34,6 +34,7 @@ public class DefaultCategoryService implements CategoryService {
     @Produces("application/json")
     @Override
     public CategoryList getCategories() {
+        CategoryList list = new CategoryList();
         List<String> categories = new ArrayList<String>();
         try {
             Document doc = feedDao.retrieveFeed(ALL_BOOKS_FEED);
@@ -46,8 +47,11 @@ public class DefaultCategoryService implements CategoryService {
             }
         } catch(Exception e) {
             log.severe("An error occurred while retrieving the complete list of categories: " + e.getMessage());
+            list.setError("An error occurred while loading the category list.  "+
+                    "This is likely because of slowness on the site.  Please go back and try again.  "+
+                    "If the problem persists please <a href='mailto:mkimberlin@gmail.com'>let me know</a>.");
         }
-        CategoryList list = new CategoryList();
+        
         list.setCategories(categories);
         return list;
     }

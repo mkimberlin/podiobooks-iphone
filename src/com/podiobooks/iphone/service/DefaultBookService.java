@@ -79,6 +79,7 @@ public class DefaultBookService extends SiteParsingService implements BookServic
     @Override public BookList getBooks(@PathParam("category")String category) {
         if(category != null)
             category = category.replaceAll("-_-", "/");
+        BookList list = new BookList();
         List<Book> books = new ArrayList<Book>();
         try {
             Document doc = feedDao.retrieveFeed(ALL_BOOKS_FEED);
@@ -93,9 +94,10 @@ public class DefaultBookService extends SiteParsingService implements BookServic
             }
         } catch(Exception e) {
             log.severe("An error occurred while loading books for the category \"" +category+"\": " + e.getMessage());
-            e.printStackTrace();
+            list.setError("An error occurred while loading titles for this category.  "+
+                "This is likely because of slowness on the site.  Please go back and try again.  "+
+                "If the problem persists please <a href='mailto:mkimberlin@gmail.com'>let me know</a>.");
         }
-        BookList list = new BookList();
         list.setBooks(books);
         return list;
     }
@@ -106,20 +108,20 @@ public class DefaultBookService extends SiteParsingService implements BookServic
     @GET @Path("search")
     @Produces("application/json")
     @Override public BookList searchBooks(@QueryParam("keyword") String keywords) {
-        BookList bookList = new BookList();
+        BookList list = new BookList();
+        List<Book> books = new ArrayList<Book>();
         try {keywords = URLEncoder.encode(keywords, "UTF-8");}catch(Exception e ) {}
         try {
             URL url = new URL(BASE_SEARCH_URL+keywords);
-            List<Book> books = new ArrayList<Book>();
             books = extractSearchResults(url);
-            bookList.setBooks(books);
         } catch (Exception e) {
             log.severe("An unexpected error occurred while retrieving search results corresponding to: \""+keywords+"\": " + e.getMessage());
-            e.printStackTrace();
-            bookList.setBooks(new ArrayList<Book>());
+            list.setError("An error occurred while loading the search results.  "+
+                    "This is likely because of slowness on the site.  Please go back and try again.  "+
+                    "If the problem persists please <a href='mailto:mkimberlin@gmail.com'>let me know</a>.");
         }
-        
-        return bookList;
+        list.setBooks(books);
+        return list;
     }
     
     /**
@@ -128,7 +130,8 @@ public class DefaultBookService extends SiteParsingService implements BookServic
     @GET @Path("recent")
     @Produces("application/json")
     @Override public BookList getRecentUpdates() {
-        BookList bookList = new BookList();
+        BookList list = new BookList();
+        List<Book> books = new ArrayList<Book>();
         try {
             URL url = new URL(MAIN_URL);
             StringBuilder result = readContents(url);
@@ -136,14 +139,15 @@ public class DefaultBookService extends SiteParsingService implements BookServic
             //Snip out the recent updates section...
             result.delete(0, result.indexOf("<p>Recent Updates</p>"));
             result.delete(result.indexOf("</ul>"), result.length());
-            
-            bookList.setBooks(extractRecentUpdates(result));
+            books = extractRecentUpdates(result);
         } catch (IOException e) {
             log.severe("An unexpected error occurred while retrieving recent book updates: " + e.getMessage());
-            e.printStackTrace();
-            bookList.setBooks(new ArrayList<Book>());
+            list.setError("An error occurred while loading the recently updated titles.  "+
+                    "This is likely because of slowness on the site.  Please go back and try again.  "+
+                    "If the problem persists please <a href='mailto:mkimberlin@gmail.com'>let me know</a>.");
         }
-        return bookList;
+        list.setBooks(books);
+        return list;
     }
     
     /**
@@ -183,11 +187,14 @@ public class DefaultBookService extends SiteParsingService implements BookServic
         try {
             Document doc = feedDao.retrieveFeed(url);
             book = constructBookFromDetailedFeed(doc);
+            book.setFeedUrl(url);
         } catch (Exception e) {
             log.severe("An error occurred while retrieving or parsing the RSS feed \""
                 + url + "\": " + e.getMessage());
-            e.printStackTrace();
             book = new Book();
+            book.setError("An error occurred while loading the requested title.  "+
+                    "This is likely because of slowness on the site.  Please go back and try again.  "+
+                    "If the problem persists please <a href='mailto:mkimberlin@gmail.com'>let me know</a>.");
         }
 
         return book;

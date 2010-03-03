@@ -27,7 +27,8 @@ public class DefaultStatisticsService extends SiteParsingService implements Stat
     @GET @Path("today")
     @Produces("application/json")
     @Override public BookList getTodaysTopSubscriptions() {
-        BookList bookList = new BookList();
+        BookList list = new BookList();
+        List<Book> books = new ArrayList<Book>();
         try {
             URL url = new URL(CHARTS_URL);
             StringBuilder result = readContents(url);
@@ -36,13 +37,15 @@ public class DefaultStatisticsService extends SiteParsingService implements Stat
             result.delete(0, result.indexOf("<p>Today's Top Subscriptions</p>"));
             result.delete(result.indexOf("</td>"), result.length());
             
-            bookList.setBooks(extractBooksFromListItems(result));
+            books = extractBooksFromListItems(result);
         } catch (IOException e) {
             log.severe("An unexpected error occurred while retrieving today's top subscriptions: " + e.getMessage());
-            e.printStackTrace();
-            bookList.setBooks(new ArrayList<Book>());
+            list.setError("An error occurred while loading today's subscriptions.  "+
+                    "This is likely because of slowness on the site.  Please go back and try again.  "+
+                    "If the problem persists please <a href='mailto:mkimberlin@gmail.com'>let me know</a>.");
         }
-        return bookList;
+        list.setBooks(books);
+        return list;
     }
 
     /**
@@ -51,7 +54,8 @@ public class DefaultStatisticsService extends SiteParsingService implements Stat
     @GET @Path("top")
     @Produces("application/json")
     @Override public BookList getTopTen() {
-        BookList bookList = new BookList();
+        BookList list = new BookList();
+        List<Book> books = new ArrayList<Book>();
         try {
             URL url = new URL(CHARTS_URL);
             StringBuilder result = readContents(url);
@@ -61,13 +65,15 @@ public class DefaultStatisticsService extends SiteParsingService implements Stat
             //Strangely, top ten is missing a </td>...look for the <tr instead.
             result.delete(result.indexOf("<tr"), result.length());
             
-            bookList.setBooks(extractBooksFromListItems(result));
+            books = extractBooksFromListItems(result);
         } catch (IOException e) {
             log.severe("An unexpected error occurred while retrieving top ten subscriptions: " + e.getMessage());
-            e.printStackTrace();
-            bookList.setBooks(new ArrayList<Book>());
+            list.setError("An error occurred while loading the top ten.  "+
+                    "This is likely because of slowness on the site.  Please go back and try again.  "+
+                    "If the problem persists please <a href='mailto:mkimberlin@gmail.com'>let me know</a>.");
         }
-        return bookList;
+        list.setBooks(books);
+        return list;
     }
     
     /**
@@ -76,7 +82,8 @@ public class DefaultStatisticsService extends SiteParsingService implements Stat
     @GET @Path("overall")
     @Produces("application/json")
     @Override public BookList getTopOverall() {
-        BookList bookList = new BookList();
+        BookList list = new BookList();
+        List<Book> books = new ArrayList<Book>();
         try {
             URL url = new URL(CHARTS_URL);
             StringBuilder result = readContents(url);
@@ -85,13 +92,16 @@ public class DefaultStatisticsService extends SiteParsingService implements Stat
             result.delete(0, result.indexOf("<p>Top Overall Rating</p>"));
             result.delete(result.indexOf("</td>"), result.length());
             
-            bookList.setBooks(extractBooksFromListItems(result));
+            books  = extractBooksFromListItems(result);
         } catch (IOException e) {
             log.severe("An unexpected error occurred while retrieving top overall ratings: " + e.getMessage());
-            e.printStackTrace();
-            bookList.setBooks(new ArrayList<Book>());
+            list.setError("An error occurred while loading the top overall titles.  "+
+                    "This is likely because of slowness on the site.  Please go back and try again.  "+
+                    "If the problem persists please <a href='mailto:mkimberlin@gmail.com'>let me know</a>.");
         }
-        return bookList;
+
+        list.setBooks(books);        
+        return list;
     }
     
     /**
@@ -100,7 +110,8 @@ public class DefaultStatisticsService extends SiteParsingService implements Stat
     @GET @Path("topbyvotes")
     @Produces("application/json")
     @Override public BookList getTopByVotes() {
-        BookList bookList = new BookList();
+        BookList list = new BookList();
+        List<Book> books = new ArrayList<Book>();
         try {
             URL url = new URL(CHARTS_URL);
             StringBuilder result = readContents(url);
@@ -109,13 +120,16 @@ public class DefaultStatisticsService extends SiteParsingService implements Stat
             result.delete(0, result.indexOf("<p>Top Overall Rating by No. of Votes</p>"));
             result.delete(result.indexOf("</td>"), result.length());
             
-            bookList.setBooks(extractBooksFromListItems(result));
+            books = extractBooksFromListItems(result);
         } catch (IOException e) {
             log.severe("An unexpected error occurred while retrieving top ratings by votes: " + e.getMessage());
-            e.printStackTrace();
-            bookList.setBooks(new ArrayList<Book>());
+            list.setError("An error occurred while loading the top titles by votes.  "+
+                    "This is likely because of slowness on the site.  Please go back and try again.  "+
+                    "If the problem persists please <a href='mailto:mkimberlin@gmail.com'>let me know</a>.");
         }
-        return bookList;
+        
+        list.setBooks(books);
+        return list;
     }
     
     /**
@@ -124,7 +138,8 @@ public class DefaultStatisticsService extends SiteParsingService implements Stat
     @GET @Path("alltime")
     @Produces("application/json")
     @Override public BookList getTopAllTimeSubscriptions() {
-        BookList bookList = new BookList();
+        BookList list = new BookList();
+        List<Book> books = new ArrayList<Book>();
         try {
             URL url = new URL(CHARTS_URL);
             StringBuilder result = readContents(url);
@@ -133,13 +148,16 @@ public class DefaultStatisticsService extends SiteParsingService implements Stat
             result.delete(0, result.indexOf("<p>All Time Top Subscriptions</p>"));
             result.delete(result.indexOf("</td>"), result.length());
             
-            bookList.setBooks(extractBooksFromListItems(result));
+            books = extractBooksFromListItems(result);
         } catch (IOException e) {
             log.severe("An unexpected error occurred while retrieving today's top all time subscriptions: " + e.getMessage());
-            e.printStackTrace();
-            bookList.setBooks(new ArrayList<Book>());
+            list.setError("An error occurred while loading today's top titles.  "+
+                    "This is likely because of slowness on the site.  Please go back and try again.  "+
+                    "If the problem persists please <a href='mailto:mkimberlin@gmail.com'>let me know</a>.");
         }
-        return bookList;
+        
+        list.setBooks(books);
+        return list;
     }
     
     private List<Book> extractBooksFromListItems(StringBuilder result) {

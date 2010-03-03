@@ -6,7 +6,7 @@
     <style type="text/css" media="screen">@import "css/scrolling.css";</style>
     <style type="text/css" media="screen">@import "css/podiobooks.css";</style>
     <script type="text/javascript" src="js/jquery.js"></script>
-    <script type="text/javascript" src="js/iphone.js"></script>
+    <script type="text/javascript" src="js/podiobooks.js"></script>
     <script type="text/javascript" src="js/jqtouch.js"></script> 
     <script type="text/javascript" src="js/extensions/jqt.scrolling.js"></script>
     <script type="text/javascript"> 
@@ -20,41 +20,45 @@
               'images/logo.png',
               'themes/apple/img/backButton.png',
               'images/cover.png',
-              'images/chevron_circle.png'
+              'images/chevron_circle.png',
+              'themes/apple/img/toolbar.png'
               ]
       });
 
-      initializeStorage();
+      Podiobooks.initializeStorage();
       
       $(document).ready(function(e) {
         //Eventually, these groups should be changed to something like this:
         //    $('#topten').tap(loadTopTen);
-        $('#topten').bind('tap', loadTopTen);
-        $('#topten').bind('click', loadTopTen);
+        $('#topten').bind('tap', Podiobooks.loadTopTen);
+        $('#topten').bind('click', Podiobooks.loadTopTen);
 
-        $('#today').bind('tap', loadTodaysTop);
-        $('#today').bind('click', loadTodaysTop);
+        $('#today').bind('tap', Podiobooks.loadTodaysTop);
+        $('#today').bind('click', Podiobooks.loadTodaysTop);
 
-        $('#overall').bind('tap', loadTopOverall);
-        $('#overall').bind('click', loadTopOverall);
+        $('#overall').bind('tap', Podiobooks.loadTopOverall);
+        $('#overall').bind('click', Podiobooks.loadTopOverall);
 
-        $('#votes').bind('tap', loadTopByVotes);
-        $('#votes').bind('click', loadTopByVotes);
+        $('#votes').bind('tap', Podiobooks.loadTopByVotes);
+        $('#votes').bind('click', Podiobooks.loadTopByVotes);
 
-        $('#alltime').bind('tap', loadTopAllTime);
-        $('#alltime').bind('click', loadTopAllTime);
+        $('#alltime').bind('tap', Podiobooks.loadTopAllTime);
+        $('#alltime').bind('click', Podiobooks.loadTopAllTime);
 
-        $('#recent').bind('tap', loadRecent);
-        $('#recent').bind('click', loadRecent);
+        $('#recent').bind('tap', Podiobooks.loadRecent);
+        $('#recent').bind('click', Podiobooks.loadRecent);
 
-        $('#categories').bind('tap', loadCategories);
-        $('#categories').bind('click', loadCategories);
+        $('#categories').bind('tap', Podiobooks.loadCategories);
+        $('#categories').bind('click', Podiobooks.loadCategories);
 
-        $('#random').bind('tap', loadAnyRandom);
-        $('#random').bind('click', loadAnyRandom);
+        $('#random').bind('tap', Podiobooks.loadRandom);
+        $('#random').bind('click', Podiobooks.loadRandom);
+
+        $('#favs').bind('tap', Podiobooks.loadFavorites);
+        $('#favs').bind('click', Podiobooks.loadFavorites);
         
         $('#searchForm').submit(function(event){    
-            search(); 
+        	Podiobooks.executeSearch(); 
             event.preventDefault();
             return false;
         });
@@ -74,6 +78,7 @@
           <li><a href="#hot">What's Hot</a></li>
           <li><a id="recent" href="#books">Recent Updates</a></li>
           <li><a id="categories" href="#categorypage">Browse Categories</a></li>
+          <li><a id="favs" href="#books">Favorite Titles</a></li>
           <li><a id="random" href="#detail">Find Random Title</a></li>
           <li><a id="searchlink" href="#searchpage">Search for Books</a></li>
         </ul>
@@ -113,7 +118,7 @@
         </div>
         <div class="logo"><img src="images/logo.png" height="44" width="60"></div>
         <div class="vertical-scroll">
-        <div id="bookScroll">
+        <div class="bookList">
         </div>
         </div>
       </div>
@@ -126,7 +131,7 @@
         <div class="logo"><img src="images/logo.png" height="44" width="60"></div>
         <div align="center">
           <form id="searchForm">
-          <input id="search" type="search" name="keyword" results="5"/>
+          <input type="search" name="keyword" results="5"/>
           </form>
         </div>
         <div class="vertical-scroll search">

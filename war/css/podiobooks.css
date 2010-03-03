@@ -1,9 +1,10 @@
-body {
+#jqt * {
 	font-family: "Helvetica Neue", Helvetica;
 }
 
 #jqt ul li, #jqt ul li a {
-	color: #222;	
+	color: #222;
+	display: list-item;	
 }
 
 .logo {
@@ -38,19 +39,23 @@ body {
 }
 
 #bookTitle {
-    font-size: 18px;
+    font-size: 17px;
     font-weight: bold;
     text-shadow: 0px 2px 0px #fff;
 }
 
 .author {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: bold;
     text-shadow: 0px 2px 0px #fff;
 }
 
-.updateDate, .currentPosition {
-	font-size: 12px;
+#expandDesc {
+	font-weight: bold;
+}
+
+.updateDate, .currentPosition, .favorite {
+	font-size: 13px;
 }
 
 .playEpisode {
