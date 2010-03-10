@@ -14,7 +14,7 @@
           icon: 'apple-touch-icon.png',
           startupScreen: 'images/startup.png',
           statusBar: 'black',
-          slideSelector: '#jqt li a',
+          slideSelector: '.slide, #jqt li a',
           slideupSelector: '.slideup, #jqt li a[href="#detail"]',
           preloadImages: [
               'images/logo.png',
@@ -31,38 +31,49 @@
         //Eventually, these groups should be changed to something like this:
         //    $('#topten').tap(loadTopTen);
         $('#topten').bind('tap', Podiobooks.loadTopTen);
-        $('#topten').bind('click', Podiobooks.loadTopTen);
+        //$('#topten').bind('click', Podiobooks.loadTopTen);
 
         $('#today').bind('tap', Podiobooks.loadTodaysTop);
-        $('#today').bind('click', Podiobooks.loadTodaysTop);
+        //$('#today').bind('click', Podiobooks.loadTodaysTop);
 
         $('#overall').bind('tap', Podiobooks.loadTopOverall);
-        $('#overall').bind('click', Podiobooks.loadTopOverall);
+        //$('#overall').bind('click', Podiobooks.loadTopOverall);
 
         $('#votes').bind('tap', Podiobooks.loadTopByVotes);
-        $('#votes').bind('click', Podiobooks.loadTopByVotes);
+        //$('#votes').bind('click', Podiobooks.loadTopByVotes);
 
         $('#alltime').bind('tap', Podiobooks.loadTopAllTime);
-        $('#alltime').bind('click', Podiobooks.loadTopAllTime);
+        //$('#alltime').bind('click', Podiobooks.loadTopAllTime);
 
-        $('#recent').bind('tap', Podiobooks.loadRecent);
-        $('#recent').bind('click', Podiobooks.loadRecent);
+        $('.recent').bind('tap', Podiobooks.loadRecent);
+        //$('.recent').bind('click', Podiobooks.loadRecent);
 
-        $('#categories').bind('tap', Podiobooks.loadCategories);
-        $('#categories').bind('click', Podiobooks.loadCategories);
+        $('.categories').bind('tap', Podiobooks.loadCategories);
+        //$('.categories').bind('click', Podiobooks.loadCategories);
 
-        $('#random').bind('tap', Podiobooks.loadRandom);
-        $('#random').bind('click', Podiobooks.loadRandom);
+        $('.random').bind('tap', Podiobooks.loadRandom);
+        //$('.random').bind('click', Podiobooks.loadRandom);
 
-        $('#favs').bind('tap', Podiobooks.loadFavorites);
-        $('#favs').bind('click', Podiobooks.loadFavorites);
+        $('.favs').bind('tap', Podiobooks.loadFavorites);
+        //$('.favs').bind('click', Podiobooks.loadFavorites);
         
         $('#searchForm').submit(function(event){    
-        	Podiobooks.executeSearch(); 
+          Podiobooks.executeSearch(); 
             event.preventDefault();
             return false;
         });
       });
+    </script>
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-1366595-5']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ga);
+      })();
     </script>
     <title>Podiobooks.com</title>
   </head>
@@ -74,40 +85,72 @@
           <h1>Podiobooks.com</h1>
         </div>
         <div class="logo"><img src="images/logo.png" height="44" width="60"></div>
-        <ul class="rounded">
-          <li><a href="#hot">What's Hot</a></li>
-          <li><a id="recent" href="#books">Recent Updates</a></li>
-          <li><a id="categories" href="#categorypage">Browse Categories</a></li>
-          <li><a id="favs" href="#books">Favorite Titles</a></li>
-          <li><a id="random" href="#detail">Find Random Title</a></li>
-          <li><a id="searchlink" href="#searchpage">Search for Books</a></li>
-        </ul>
+        <p>The Podiobooks.com mobile application is made available for free, just
+        like the rest of Podiobooks.com.  If you enjoy a book, please tell a friend.
+        If you really enjoy a book, visit the site and make a donation to the author.</p>
+        <p>If you appreciate the service and would like to help keep it around for others
+        to enjoy, use the form below to contribute.</p>
+        <p style="text-align: center;"><b>Give some cash to the staff of Podiobooks.com!</b></p>    
+        <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank" style="text-align: center;"> 
+          <input type="hidden" name="cmd" value="_xclick"> 
+          <input type="hidden" name="business" value="evo@podiobooks.com"> 
+          <input type="hidden" name="item_name" value="Podiobooks.com General donation"> 
+          <input type="hidden" name="item_number" value="General"> 
+          $<input type="text" style="font-size: 18px; margin-bottom: 5px;" name="amount" value="9.99" size="8"> 
+          <input type="hidden" name="no_note" value="1"> 
+          <input type="hidden" name="currency_code" value="USD"> 
+          <input type="hidden" name="tax" value="0"> 
+          <br/>
+          <input type="image" style="height: 35px; width: 165px;" src="/images/x-click-but21.gif" border="0" onclick="submit();" alt="Make payments with PayPal - it's fast, free and secure!"> 
+        </form>
+        <div class="toolbar tabbar">
+          <a class="fade" href="#hot"><img src="images/hot.png" /></a>
+          <a class="fade recent" href="#recent"><img src="images/recent.png" /></a>
+          <a class="fade categories" href="#categorypage"><img src="images/categories.png" /></a>
+          <a class="fade favs" href="#favorites"><img src="images/favorites.png" /></a>
+          <a class="fade random" href="#random"><img src="images/random.png" /></a>
+          <a class="fade" href="#searchpage"><img src="images/search.png" /></a>
+        </div>
       </div>
       
       <div id="hot">
         <div class="toolbar">
-          <a href="#" class="back">Back</a>
           <h1>What's Hot</h1>
         </div>
         <div class="logo"><img src="images/logo.png" height="44" width="60"></div>
-        <ul class="rounded">
+        <ul class="edgetoedge">
           <li><a id="topten" href="#books">Top Ten</a></li>
           <li><a id="today" href="#books">Today's Top Subscriptions</a></li>
           <li><a id="overall" href="#books">Top Rated</a></li>
           <li><a id="votes" href="#books">Top Rated By Votes</a></li>
           <li><a id="alltime" href="#books">All Time Top Subscriptions</a></li>
         </ul>
+        <div class="toolbar tabbar">
+          <a class="fade" href="#hot"><img src="images/hot.png" /></a>
+          <a class="fade recent" href="#recent"><img src="images/recent.png" /></a>
+          <a class="fade categories" href="#categorypage"><img src="images/categories.png" /></a>
+          <a class="fade favs" href="#favorites"><img src="images/favorites.png" /></a>
+          <a class="fade random" href="#random"><img src="images/random.png" /></a>
+          <a class="fade" href="#searchpage"><img src="images/search.png" /></a>
+        </div>
       </div>
       
       <div id="categorypage">
         <div class="toolbar">
-          <a href="#" class="back">Back</a>
           <h1>Categories</h1>
         </div>
         <div class="logo"><img src="images/logo.png" height="44" width="60"></div>
         <div class="vertical-scroll">
         <div id="categoryScroll">
         </div>
+        </div>
+        <div class="toolbar tabbar">
+          <a class="fade" href="#hot"><img src="images/hot.png" /></a>
+          <a class="fade recent" href="#recent"><img src="images/recent.png" /></a>
+          <a class="fade categories" href="#categorypage"><img src="images/categories.png" /></a>
+          <a class="fade favs" href="#favorites"><img src="images/favorites.png" /></a>
+          <a class="fade random" href="#random"><img src="images/random.png" /></a>
+          <a class="fade" href="#searchpage"><img src="images/search.png" /></a>
         </div>
       </div>
       
@@ -121,11 +164,75 @@
         <div class="bookList">
         </div>
         </div>
+        <div class="toolbar tabbar">
+          <a class="fade" href="#hot"><img src="images/hot.png" /></a>
+          <a class="fade recent" href="#recent"><img src="images/recent.png" /></a>
+          <a class="fade categories" href="#categorypage"><img src="images/categories.png" /></a>
+          <a class="fade favs" href="#favorites"><img src="images/favorites.png" /></a>
+          <a class="fade random" href="#random"><img src="images/random.png" /></a>
+          <a class="fade" href="#searchpage"><img src="images/search.png" /></a>
+        </div>
+      </div>
+      
+      <div id="recent">
+        <div class="toolbar">
+          <h1>Recent Updates</h1>
+        </div>
+        <div class="logo"><img src="images/logo.png" height="44" width="60"></div>
+        <div class="vertical-scroll">
+        <div class="bookList">
+        </div>
+        </div>
+        <div class="toolbar tabbar">
+          <a class="fade" href="#hot"><img src="images/hot.png" /></a>
+          <a class="fade recent" href="#recent"><img src="images/recent.png" /></a>
+          <a class="fade categories" href="#categorypage"><img src="images/categories.png" /></a>
+          <a class="fade favs" href="#favorites"><img src="images/favorites.png" /></a>
+          <a class="fade random" href="#random"><img src="images/random.png" /></a>
+          <a class="fade" href="#searchpage"><img src="images/search.png" /></a>
+        </div>
+      </div>
+      
+      <div id="favorites">
+        <div class="toolbar">
+          <h1>Favorites</h1>
+        </div>
+        <div class="logo"><img src="images/logo.png" height="44" width="60"></div>
+        <div class="vertical-scroll">
+        <div class="bookList">
+        </div>
+        </div>
+        <div class="toolbar tabbar">
+          <a class="fade" href="#hot"><img src="images/hot.png" /></a>
+          <a class="fade recent" href="#recent"><img src="images/recent.png" /></a>
+          <a class="fade categories" href="#categorypage"><img src="images/categories.png" /></a>
+          <a class="fade favs" href="#favorites"><img src="images/favorites.png" /></a>
+          <a class="fade random" href="#random"><img src="images/random.png" /></a>
+          <a class="fade" href="#searchpage"><img src="images/search.png" /></a>
+        </div>
+      </div>
+      
+      <div id="random">
+        <div class="toolbar">
+          <h1>Book Detail</h1>
+        </div>
+        <div class="logo"><img src="images/logo.png" height="44" width="60"></div>
+        <div class="vertical-scroll">
+        <div class="bookDetail">
+        </div>
+        </div>
+        <div class="toolbar tabbar">
+          <a class="fade" href="#hot"><img src="images/hot.png" /></a>
+          <a class="fade recent" href="#recent"><img src="images/recent.png" /></a>
+          <a class="fade categories" href="#categorypage"><img src="images/categories.png" /></a>
+          <a class="fade favs" href="#favorites"><img src="images/favorites.png" /></a>
+          <a class="fade random" href="#random"><img src="images/random.png" /></a>
+          <a class="fade" href="#searchpage"><img src="images/search.png" /></a>
+        </div>
       </div>
       
       <div id="searchpage">
         <div class="toolbar">
-          <a href="#" class="back">Back</a>
           <h1>Search</h1>
         </div>
         <div class="logo"><img src="images/logo.png" height="44" width="60"></div>
@@ -138,6 +245,14 @@
         <div id="results">
         </div>
         </div>
+        <div class="toolbar tabbar">
+          <a class="fade" href="#hot"><img src="images/hot.png" /></a>
+          <a class="fade recent" href="#recent"><img src="images/recent.png" /></a>
+          <a class="fade categories" href="#categorypage"><img src="images/categories.png" /></a>
+          <a class="fade favs" href="#favorites"><img src="images/favorites.png" /></a>
+          <a class="fade random" href="#random"><img src="images/random.png" /></a>
+          <a class="fade" href="#searchpage"><img src="images/search.png" /></a>
+        </div>
       </div>
       
       <div id="detail">
@@ -147,8 +262,16 @@
         </div>
         <div class="logo"><img src="images/logo.png" height="44" width="60"></div>
         <div class="vertical-scroll">
-        <div id="bookDetail">
+        <div class="bookDetail">
         </div>
+        </div>
+        <div class="toolbar tabbar">
+          <a class="fade" href="#hot"><img src="images/hot.png" /></a>
+          <a class="fade recent" href="#recent"><img src="images/recent.png" /></a>
+          <a class="fade categories" href="#categorypage"><img src="images/categories.png" /></a>
+          <a class="fade favs" href="#favorites"><img src="images/favorites.png" /></a>
+          <a class="fade random" href="#random"><img src="images/random.png" /></a>
+          <a class="fade" href="#searchpage"><img src="images/search.png" /></a>
         </div>
       </div>
     </div>

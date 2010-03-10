@@ -2,9 +2,52 @@
 	font-family: "Helvetica Neue", Helvetica;
 }
 
+#jqt p {
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+#home p {
+    margin: 10px 10px 5px 10px;
+}
+
 #jqt ul li, #jqt ul li a {
 	color: #222;
 	display: list-item;	
+}
+
+div#jqt .toolbar > h1 {
+    font-size: 18px;
+}
+
+#jqt .toolbar.tabbar {
+    position: absolute;
+    overflow: hidden;
+    z-index: 3;
+    left: 0px;
+    top: 412px;
+    background: #000 url(../images/tabbar.png) repeat-x;
+    height: 48px;
+    width: 100%;
+    padding: 0px; 
+    border-bottom: 1px solid #000;
+}
+
+#jqt .toolbar.tabbar a {
+    margin: 0px 1px 0px 1px;
+}
+
+#jqt.landscape .toolbar.tabbar {
+    position: absolute;
+    overflow: hidden;
+    z-index: 3;
+    left: 0px;
+    top: 252px;
+    background: #000 url(../images/tabbar.png) repeat-x;
+    height: 48px;
+    width: 100%;
+    padding: 0px 2px 0px 2px; 
+    border-bottom: 1px solid #000;
 }
 
 .logo {
@@ -73,11 +116,11 @@
 }
 
 
-#bookDetail, #embed {
+.bookDetail, #embed {
 	padding: 10px 10px 10px 10px;
 }
 
-#bookDetail ul {
+#jqt .bookDetail ul {
 	margin: 15px 0px 17px 0px;	
 }
 
@@ -144,23 +187,42 @@
     margin-right: 25px;
 }
 
-#search {
+#searchForm input {
 	font-size: 18px;
 	margin-top: 10px;
+	margin-bottom: 10px;
 }
 
 .vertical-scroll {
-	height: 415px;
+	height: 367x;
 }
 
 .landscape .vertical-scroll {
-	height: 250px;
+	height: 230px;
 }
 
 .vertical-scroll.search {
-	height: 385px;
+	height: 323px;
 }
 
 .landscape .vertical-scroll.search {
-	height: 220px;
+	height: 185px;
+}
+
+#jqt ul.edgetoedge {
+    border-width: 1px 0;
+    margin: 0;
+    padding: 0;
+}
+#jqt ul.edgetoedge li {
+    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#f3f3f3), to(#ffffff));
+    border-bottom: 2px solid #bbbbbb;
+    border-top: 1px solid #dddddd;
+    font-size: 18px;
+    margin-bottom: -1px;
+}
+
+#jqt ul.edgetoedge li em {
+    font-weight: normal;
+    font-style: normal;
 }

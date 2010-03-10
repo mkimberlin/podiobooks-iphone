@@ -40,7 +40,7 @@ var Podiobooks = (function () {
         var bookList,
             bookElement, i,
             row, title, id,
-            page = $('#books'),
+            page = $('#favorites'),
             books = page.find('.bookList'),
             loadBookHandler = function () {
                 Podiobooks.loadBookDetail('resources/books/title/' + $(this).attr('id'));
@@ -54,7 +54,7 @@ var Podiobooks = (function () {
         if (result.rows.length === 0) {
             books.append('<p style="text-align:center">No Favorites Found</p>');
         } else {
-            books.append('<ul class="rounded"></ul>');
+            books.append('<ul class="edgetoedge"></ul>');
             bookList = books.find('ul');
             for (i = 0; i < result.rows.length; i = i + 1) {
                 row = result.rows.item(i);
@@ -99,7 +99,7 @@ var Podiobooks = (function () {
         } else if (bookList === null || bookList.books === undefined || bookList.books.length === 0) {
             target.append('<p style="text-align:center">No Books Found</p>');
         } else {
-            target.append('<ul class="rounded"></ul>');
+            target.append('<ul class="edgetoedge"></ul>');
             list = target.children('ul');
             books = bookList.books;
             
@@ -167,7 +167,7 @@ var Podiobooks = (function () {
         if (categories === undefined || categories === null) {
             categoryList.append('<p style="text-align:center">No Categories Found!</p>');
         } else {
-            categoryList.append('<ul class="rounded"></ul>');
+            categoryList.append('<ul class="edgetoedge"></ul>');
             categoryList = categoryList.find('ul');
             for (idx in categories) {
                 if (!isNaN(Number(idx))) {
@@ -273,7 +273,7 @@ var Podiobooks = (function () {
         
         player.empty();
         player.append('<audio src="' +
-                episodes[nowPlaying + 1].url + '" height="0" width="0"></audio>');
+                episodes[nowPlaying].url + '" height="0" width="0"></audio>');
     },
     
     checkPosition = function () {
@@ -281,31 +281,30 @@ var Podiobooks = (function () {
             duration,
             position,
             episode;
-        if (audio[0].paused) {
-            clearPlayerIntervals();
-        }
         
-        duration = audio.attr('duration');
-        position = audio.attr('currentTime');
-        episode = episodes[nowPlaying];
-        episodes[nowPlaying].duration = duration;
-        if (position !== 0) {
-            episodes[nowPlaying].position = position;
-        }
-        
-        if (duration !== 0 && duration !== undefined) {
-            //If within a second.
-            if (duration < position + 1) {
-                //The order of these calls is important.
-                clearPlayerIntervals();
-                audio.remove();
-                updatePosition(nowPlaying, true);
-                episodes[nowPlaying].complete = true;
-                updateEpisode();
-                showNextEpisodeConfirm();
-            } else {
-                updatePosition(nowPlaying);
-            }
+        if (!audio[0].paused) {
+	        duration = audio.attr('duration');
+	        position = audio.attr('currentTime');
+	        episode = episodes[nowPlaying];
+	        episodes[nowPlaying].duration = duration;
+	        if (position !== 0) {
+	            episodes[nowPlaying].position = position;
+	        }
+	        
+	        if (duration !== 0 && duration !== undefined) {
+	            //If within a second.
+	            if (duration < position + 1) {
+	                //The order of these calls is important.
+	                clearPlayerIntervals();
+	                audio.remove();
+	                updatePosition(nowPlaying, true);
+	                episodes[nowPlaying].complete = true;
+	                updateEpisode();
+	                showNextEpisodeConfirm();
+	            } else {
+	                updatePosition(nowPlaying);
+	            }
+	        }
         }
     },
     
@@ -355,6 +354,7 @@ var Podiobooks = (function () {
             playHandler = function () {
                 confirmPlay($(this).attr('id'));
             };
+        episodesList.empty();
             
         for (idx in episodes) {
             if (!isNaN(Number(idx))) {
@@ -381,7 +381,7 @@ var Podiobooks = (function () {
                 episodeElem.bind('click', playHandler);
             }
         }
-    }
+    },
     
     populateEpisodeData = function (transaction, result) {
         setEpisodePositions(result);
@@ -500,7 +500,7 @@ var Podiobooks = (function () {
          * Loads favorite titles from the database and displays the results.
          */
         loadFavorites : function () {
-            var page = $('#books'),
+            var page = $('#favorites'),
                 books = page.find('.bookList');
 
             Podiobooks.displayProgress(page);
@@ -580,7 +580,7 @@ var Podiobooks = (function () {
         },
         
         loadRecent : function () {
-            loadBooksAsync('Recent Updates', 'resources/books/recent');
+            loadBooksAsync('Recent Updates', 'resources/books/recent', $('#recent'));
         },
         
         loadTopTen : function () {
@@ -604,12 +604,21 @@ var Podiobooks = (function () {
         },
         
         loadRandom : function () {
-            Podiobooks.loadBookDetail('resources/books/random');
+            Podiobooks.loadBookDetail('resources/books/random', $('#random'));
         },
         
-        loadBookDetail : function (resource) {
-            var container = $('#bookDetail'),
+        loadBookDetail : function (resource, target) {
+            var container,
                 page = $('#detail');
+            // These two lines are a temporary hack bug fix...
+            $('#random .bookDetail').empty();
+            $('#detail .bookDetail').empty();
+            
+            if (target !== undefined) {
+                page = target;
+            }
+            container = page.find('.bookDetail');
+            
             Podiobooks.displayProgress(page);
             container.css('webkitTransform', 'translateX(0px)');
             container.empty();
@@ -621,6 +630,7 @@ var Podiobooks = (function () {
                             populateBookData(book, title);
                             isFavorite(book.title, title);
                             Podiobooks.removeProgress(page);
+                            container.css('webkitTransform', 'translateX(1px)');
                         }
                     );
                 }
